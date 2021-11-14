@@ -29,13 +29,26 @@
         private void InitializeComponent()
         {
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
-            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.editToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.viewToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.exitFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.editMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.copyEditMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.imageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.resizeToFitImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.biggerSizeOkImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.memoryOnlyImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.iconOnlyImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.thumbnailOnlyImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.inCacheOnlyImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cropToSquareImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.wideThumbnailsImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.iconBackgroundImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.scaleUpImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.viewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.backgroundColorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.helpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.thumbiconPictureBox = new System.Windows.Forms.PictureBox();
             this.thumbiconPanel = new System.Windows.Forms.Panel();
@@ -46,6 +59,7 @@
             this.xLabel = new System.Windows.Forms.Label();
             this.heightNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.returnedSizeLabel = new System.Windows.Forms.Label();
+            this.colorDialog = new System.Windows.Forms.ColorDialog();
             this.mainMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.thumbiconPictureBox)).BeginInit();
             this.thumbiconPanel.SuspendLayout();
@@ -59,64 +73,173 @@
             // 
             this.mainMenuStrip.ImageScalingSize = new System.Drawing.Size(24, 24);
             this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem,
-            this.editToolStripMenuItem,
-            this.viewToolStripMenuItem,
-            this.helpToolStripMenuItem});
+            this.fileMenuItem,
+            this.editMenuItem,
+            this.imageMenuItem,
+            this.viewMenuItem,
+            this.helpMenuItem});
             this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.mainMenuStrip.Name = "mainMenuStrip";
             this.mainMenuStrip.Size = new System.Drawing.Size(1002, 33);
             this.mainMenuStrip.TabIndex = 0;
             this.mainMenuStrip.Text = "menuStrip1";
             // 
-            // fileToolStripMenuItem
+            // fileMenuItem
             // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.openToolStripMenuItem,
+            this.fileMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.openFileMenuItem,
             this.toolStripSeparator1,
-            this.exitToolStripMenuItem});
-            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(54, 29);
-            this.fileToolStripMenuItem.Text = "&File";
+            this.exitFileMenuItem});
+            this.fileMenuItem.Name = "fileMenuItem";
+            this.fileMenuItem.Size = new System.Drawing.Size(54, 29);
+            this.fileMenuItem.Text = "&File";
             // 
-            // openToolStripMenuItem
+            // openFileMenuItem
             // 
-            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(235, 34);
-            this.openToolStripMenuItem.Text = "&Open...";
-            this.openToolStripMenuItem.Click += new System.EventHandler(this.OpenToolStripMenuItem_Click);
+            this.openFileMenuItem.Name = "openFileMenuItem";
+            this.openFileMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
+            this.openFileMenuItem.Size = new System.Drawing.Size(235, 34);
+            this.openFileMenuItem.Text = "&Open...";
+            this.openFileMenuItem.Click += new System.EventHandler(this.OpenFileMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(232, 6);
             // 
-            // exitToolStripMenuItem
+            // exitFileMenuItem
             // 
-            this.exitToolStripMenuItem.Name = "exitToolStripMenuItem";
-            this.exitToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.exitToolStripMenuItem.Size = new System.Drawing.Size(235, 34);
-            this.exitToolStripMenuItem.Text = "E&xit";
-            this.exitToolStripMenuItem.Click += new System.EventHandler(this.ExitToolStripMenuItem_Click);
+            this.exitFileMenuItem.Name = "exitFileMenuItem";
+            this.exitFileMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
+            this.exitFileMenuItem.Size = new System.Drawing.Size(235, 34);
+            this.exitFileMenuItem.Text = "E&xit";
+            this.exitFileMenuItem.Click += new System.EventHandler(this.ExitFileMenuItem_Click);
             // 
-            // editToolStripMenuItem
+            // editMenuItem
             // 
-            this.editToolStripMenuItem.Name = "editToolStripMenuItem";
-            this.editToolStripMenuItem.Size = new System.Drawing.Size(58, 29);
-            this.editToolStripMenuItem.Text = "&Edit";
+            this.editMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.copyEditMenuItem});
+            this.editMenuItem.Name = "editMenuItem";
+            this.editMenuItem.Size = new System.Drawing.Size(58, 29);
+            this.editMenuItem.Text = "&Edit";
             // 
-            // viewToolStripMenuItem
+            // copyEditMenuItem
             // 
-            this.viewToolStripMenuItem.Name = "viewToolStripMenuItem";
-            this.viewToolStripMenuItem.Size = new System.Drawing.Size(65, 29);
-            this.viewToolStripMenuItem.Text = "&View";
+            this.copyEditMenuItem.Name = "copyEditMenuItem";
+            this.copyEditMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
+            this.copyEditMenuItem.Size = new System.Drawing.Size(218, 34);
+            this.copyEditMenuItem.Text = "&Copy";
+            this.copyEditMenuItem.Click += new System.EventHandler(this.CopyEditMenuItem_Click);
             // 
-            // helpToolStripMenuItem
+            // imageMenuItem
             // 
-            this.helpToolStripMenuItem.Name = "helpToolStripMenuItem";
-            this.helpToolStripMenuItem.Size = new System.Drawing.Size(65, 29);
-            this.helpToolStripMenuItem.Text = "&Help";
+            this.imageMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.resizeToFitImageMenuItem,
+            this.biggerSizeOkImageMenuItem,
+            this.memoryOnlyImageMenuItem,
+            this.iconOnlyImageMenuItem,
+            this.thumbnailOnlyImageMenuItem,
+            this.inCacheOnlyImageMenuItem,
+            this.cropToSquareImageMenuItem,
+            this.wideThumbnailsImageMenuItem,
+            this.iconBackgroundImageMenuItem,
+            this.scaleUpImageMenuItem});
+            this.imageMenuItem.Name = "imageMenuItem";
+            this.imageMenuItem.Size = new System.Drawing.Size(78, 29);
+            this.imageMenuItem.Text = "&Image";
+            // 
+            // resizeToFitImageMenuItem
+            // 
+            this.resizeToFitImageMenuItem.Checked = true;
+            this.resizeToFitImageMenuItem.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.resizeToFitImageMenuItem.Name = "resizeToFitImageMenuItem";
+            this.resizeToFitImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.resizeToFitImageMenuItem.Text = "Resize To Fit";
+            this.resizeToFitImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // biggerSizeOkImageMenuItem
+            // 
+            this.biggerSizeOkImageMenuItem.Name = "biggerSizeOkImageMenuItem";
+            this.biggerSizeOkImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.biggerSizeOkImageMenuItem.Text = "Bigger Size Ok";
+            this.biggerSizeOkImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // memoryOnlyImageMenuItem
+            // 
+            this.memoryOnlyImageMenuItem.Name = "memoryOnlyImageMenuItem";
+            this.memoryOnlyImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.memoryOnlyImageMenuItem.Text = "Memory Only";
+            this.memoryOnlyImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // iconOnlyImageMenuItem
+            // 
+            this.iconOnlyImageMenuItem.Name = "iconOnlyImageMenuItem";
+            this.iconOnlyImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.iconOnlyImageMenuItem.Text = "Icon Only";
+            this.iconOnlyImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // thumbnailOnlyImageMenuItem
+            // 
+            this.thumbnailOnlyImageMenuItem.Name = "thumbnailOnlyImageMenuItem";
+            this.thumbnailOnlyImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.thumbnailOnlyImageMenuItem.Text = "Thumbnail Only";
+            this.thumbnailOnlyImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // inCacheOnlyImageMenuItem
+            // 
+            this.inCacheOnlyImageMenuItem.Name = "inCacheOnlyImageMenuItem";
+            this.inCacheOnlyImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.inCacheOnlyImageMenuItem.Text = "In Cache Only";
+            this.inCacheOnlyImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // cropToSquareImageMenuItem
+            // 
+            this.cropToSquareImageMenuItem.Name = "cropToSquareImageMenuItem";
+            this.cropToSquareImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.cropToSquareImageMenuItem.Text = "Crop To Square";
+            this.cropToSquareImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // wideThumbnailsImageMenuItem
+            // 
+            this.wideThumbnailsImageMenuItem.Name = "wideThumbnailsImageMenuItem";
+            this.wideThumbnailsImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.wideThumbnailsImageMenuItem.Text = "Wide Thumbnails";
+            this.wideThumbnailsImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // iconBackgroundImageMenuItem
+            // 
+            this.iconBackgroundImageMenuItem.Name = "iconBackgroundImageMenuItem";
+            this.iconBackgroundImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.iconBackgroundImageMenuItem.Text = "Icon Background";
+            this.iconBackgroundImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // scaleUpImageMenuItem
+            // 
+            this.scaleUpImageMenuItem.Name = "scaleUpImageMenuItem";
+            this.scaleUpImageMenuItem.Size = new System.Drawing.Size(251, 34);
+            this.scaleUpImageMenuItem.Text = "Scale Up";
+            this.scaleUpImageMenuItem.Click += new System.EventHandler(this.FlagsImageMenuItems_Click);
+            // 
+            // viewMenuItem
+            // 
+            this.viewMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.backgroundColorToolStripMenuItem});
+            this.viewMenuItem.Name = "viewMenuItem";
+            this.viewMenuItem.Size = new System.Drawing.Size(65, 29);
+            this.viewMenuItem.Text = "&View";
+            // 
+            // backgroundColorToolStripMenuItem
+            // 
+            this.backgroundColorToolStripMenuItem.Name = "backgroundColorToolStripMenuItem";
+            this.backgroundColorToolStripMenuItem.Size = new System.Drawing.Size(269, 34);
+            this.backgroundColorToolStripMenuItem.Text = "&Background Color...";
+            this.backgroundColorToolStripMenuItem.Click += new System.EventHandler(this.BackgroundColorViewMenuItem_Click);
+            // 
+            // helpMenuItem
+            // 
+            this.helpMenuItem.Name = "helpMenuItem";
+            this.helpMenuItem.Size = new System.Drawing.Size(65, 29);
+            this.helpMenuItem.Text = "&Help";
             // 
             // openFileDialog
             // 
@@ -125,7 +248,7 @@
             // thumbiconPictureBox
             // 
             this.thumbiconPictureBox.BackColor = System.Drawing.Color.Transparent;
-            this.thumbiconPictureBox.Location = new System.Drawing.Point(272, 80);
+            this.thumbiconPictureBox.Location = new System.Drawing.Point(373, 182);
             this.thumbiconPictureBox.Name = "thumbiconPictureBox";
             this.thumbiconPictureBox.Size = new System.Drawing.Size(256, 256);
             this.thumbiconPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -276,13 +399,13 @@
         #endregion
 
         private MenuStrip mainMenuStrip;
-        private ToolStripMenuItem fileToolStripMenuItem;
-        private ToolStripMenuItem openToolStripMenuItem;
+        private ToolStripMenuItem fileMenuItem;
+        private ToolStripMenuItem openFileMenuItem;
         private ToolStripSeparator toolStripSeparator1;
-        private ToolStripMenuItem exitToolStripMenuItem;
-        private ToolStripMenuItem editToolStripMenuItem;
-        private ToolStripMenuItem viewToolStripMenuItem;
-        private ToolStripMenuItem helpToolStripMenuItem;
+        private ToolStripMenuItem exitFileMenuItem;
+        private ToolStripMenuItem editMenuItem;
+        private ToolStripMenuItem viewMenuItem;
+        private ToolStripMenuItem helpMenuItem;
         private OpenFileDialog openFileDialog;
         private PictureBox thumbiconPictureBox;
         private Panel thumbiconPanel;
@@ -293,5 +416,19 @@
         private Label xLabel;
         private NumericUpDown heightNumericUpDown;
         private Label returnedSizeLabel;
+        private ToolStripMenuItem backgroundColorToolStripMenuItem;
+        private ColorDialog colorDialog;
+        private ToolStripMenuItem copyEditMenuItem;
+        private ToolStripMenuItem imageMenuItem;
+        private ToolStripMenuItem resizeToFitImageMenuItem;
+        private ToolStripMenuItem biggerSizeOkImageMenuItem;
+        private ToolStripMenuItem memoryOnlyImageMenuItem;
+        private ToolStripMenuItem iconOnlyImageMenuItem;
+        private ToolStripMenuItem thumbnailOnlyImageMenuItem;
+        private ToolStripMenuItem inCacheOnlyImageMenuItem;
+        private ToolStripMenuItem cropToSquareImageMenuItem;
+        private ToolStripMenuItem wideThumbnailsImageMenuItem;
+        private ToolStripMenuItem iconBackgroundImageMenuItem;
+        private ToolStripMenuItem scaleUpImageMenuItem;
     }
 }

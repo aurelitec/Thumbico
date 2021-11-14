@@ -9,6 +9,8 @@ namespace Thumbico
         public MainForm()
         {
             InitializeComponent();
+
+            this.InitFlagsImageMenuItems();
         }
 
         private string ThumbiconFileName
@@ -112,33 +114,20 @@ namespace Thumbico
             }
         }
 
-
-        // *************************************
-        // File Menu Event Handlers
-        // *************************************
-
-        /// <summary>
-        /// Opens the Open File common dialog box and loads the thumbicon of the selected file.
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">An object that contains no event data.</param>
-        private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
+        private void InitFlagsImageMenuItems()
         {
-            if (this.openFileDialog.ShowDialog(this) == DialogResult.OK)
-            {
-                this.ThumbiconFileName = this.openFileDialog.FileName;
-            }
+            this.resizeToFitImageMenuItem.Tag = ThumbnailFlags.ResizeToFit;
+            this.biggerSizeOkImageMenuItem.Tag = ThumbnailFlags.BiggerSizeOk;
+            this.memoryOnlyImageMenuItem.Tag = ThumbnailFlags.MemoryOnly;
+            this.iconOnlyImageMenuItem.Tag = ThumbnailFlags.IconOnly;
+            this.thumbnailOnlyImageMenuItem.Tag = ThumbnailFlags.ThumbnailOnly;
+            this.inCacheOnlyImageMenuItem.Tag = ThumbnailFlags.InCacheOnly;
+            this.cropToSquareImageMenuItem.Tag = ThumbnailFlags.CropToSquare;
+            this.wideThumbnailsImageMenuItem.Tag = ThumbnailFlags.WideThumbnails;
+            this.iconBackgroundImageMenuItem.Tag = ThumbnailFlags.IconBackground;
+            this.scaleUpImageMenuItem.Tag = ThumbnailFlags.ScaleUp;
         }
 
-        /// <summary>
-        /// Closes the main form (and the app).
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">An object that contains no event data.</param>
-        private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            this.Close();
-        }
 
         // *************************************
         // Form Event Handlers
@@ -182,5 +171,83 @@ namespace Thumbico
         {
             this.ThumbiconSize = new Size((int)widthNumericUpDown.Value, this.ThumbiconSize.Height);
         }
+
+        // *************************************
+        // File Menu Event Handlers
+        // *************************************
+
+        /// <summary>
+        /// Opens the Open File common dialog box and loads the thumbicon of the selected file.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An object that contains no event data.</param>
+        private void OpenFileMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.openFileDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                this.ThumbiconFileName = this.openFileDialog.FileName;
+            }
+        }
+
+        /// <summary>
+        /// Closes the main form (and the app).
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An object that contains no event data.</param>
+        private void ExitFileMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        // *************************************
+        // Edit Menu Event Handlers
+        // *************************************
+
+        /// <summary>
+        /// Copies the current thumbicon image to clipboard.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An object that contains no event data.</param>
+        private void CopyEditMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.thumbiconPictureBox.Image != null)
+            {
+                Clipboard.SetImage(this.thumbiconPictureBox.Image);
+            }
+        }
+
+        // *************************************
+        // Image Menu Event Handlers
+        // *************************************
+
+        private void FlagsImageMenuItems_Click(object sender, EventArgs e)
+        {
+            if (sender is ToolStripMenuItem senderMenuItem)
+            {
+                senderMenuItem.Checked = !senderMenuItem.Checked;
+                ThumbnailFlags flag = (ThumbnailFlags)senderMenuItem.Tag;
+                this.ThumbiconFlags = senderMenuItem.Checked ? this.ThumbiconFlags | flag : this.ThumbiconFlags & ~flag;
+            }
+        }
+
+        // *************************************
+        // View Menu Event Handlers
+        // *************************************
+
+        /// <summary>
+        /// Opens the Color common dialog box and lets the user change the background color.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An object that contains no event data.</param>
+        private void BackgroundColorViewMenuItem_Click(object sender, EventArgs e)
+        {
+            this.colorDialog.Color = this.thumbiconPanel.BackColor;
+            if (this.colorDialog.ShowDialog(this) == DialogResult.OK)
+            {
+                this.thumbiconPanel.BackColor = this.colorDialog.Color;
+            }
+        }
+
+
     }
 }
