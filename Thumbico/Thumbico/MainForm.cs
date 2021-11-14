@@ -80,7 +80,7 @@ namespace Thumbico
             }
 
             bool haveImage = this.thumbiconPictureBox.Image != null;
-            // this.actualSizeStatusBarPanel.Text = haveImage ? $"Actual size: {this.thumbiconPictureBox.Image.Width} x {this.thumbiconPictureBox.Image.Height}" : string.Empty;
+            this.returnedSizeLabel.Text = haveImage ? $"Returned size: {this.thumbiconPictureBox.Image.Width} x {this.thumbiconPictureBox.Image.Height}" : string.Empty;
 
             // Because thumbnail bitmaps can be large, release the memory used by previous thumbnail managed bitmap
             if (oldThumbnail != null)
@@ -176,6 +176,11 @@ namespace Thumbico
             {
                 this.ThumbiconFileName = fileItems[0];
             }
+        }
+
+        private void WidthNumericUpDown_ValueChanged(object sender, EventArgs e)
+        {
+            this.ThumbiconSize = new Size((int)widthNumericUpDown.Value, this.ThumbiconSize.Height);
         }
     }
 }
