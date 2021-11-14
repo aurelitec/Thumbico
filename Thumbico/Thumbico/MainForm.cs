@@ -1,3 +1,5 @@
+using System.Drawing.Imaging;
+
 namespace Thumbico
 {
     public partial class MainForm : Form
@@ -167,9 +169,13 @@ namespace Thumbico
             }
         }
 
-        private void WidthNumericUpDown_ValueChanged(object sender, EventArgs e)
+        // *************************************
+        // Toolbar Event Handlers
+        // *************************************
+
+        private void DesiredSizeOkButton_Click(object sender, EventArgs e)
         {
-            this.ThumbiconSize = new Size((int)widthNumericUpDown.Value, this.ThumbiconSize.Height);
+            this.ThumbiconSize = new Size((int)widthNumericUpDown.Value, (int)heightNumericUpDown.Value);
         }
 
         // *************************************
@@ -188,6 +194,26 @@ namespace Thumbico
                 this.ThumbiconFileName = this.openFileDialog.FileName;
             }
         }
+
+        /// <summary>
+        /// Opens the Save File common dialog box and saves the thumbicon to a BMP, GIF, JPG or PNG file.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An object that contains no event data.</param>
+        private void SaveFileMenuItem_Click(object sender, EventArgs e)
+        {
+            if (this.thumbiconPictureBox.Image != null)
+            {
+                if (this.saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    ImageFormat[] formats = { ImageFormat.Bmp, ImageFormat.Gif, ImageFormat.Jpeg, ImageFormat.Png };
+                    this.thumbiconPictureBox.Image.Save(
+                        this.saveFileDialog.FileName,
+                        formats[this.saveFileDialog.FilterIndex - 1]);
+                }
+            }
+        }
+
 
         /// <summary>
         /// Closes the main form (and the app).
@@ -247,7 +273,6 @@ namespace Thumbico
                 this.thumbiconPanel.BackColor = this.colorDialog.Color;
             }
         }
-
 
     }
 }

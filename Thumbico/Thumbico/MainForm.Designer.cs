@@ -31,6 +31,8 @@
             this.mainMenuStrip = new System.Windows.Forms.MenuStrip();
             this.fileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.saveFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.exitFileMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -58,8 +60,10 @@
             this.widthNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.xLabel = new System.Windows.Forms.Label();
             this.heightNumericUpDown = new System.Windows.Forms.NumericUpDown();
+            this.desiredSizeOkButton = new System.Windows.Forms.Button();
             this.returnedSizeLabel = new System.Windows.Forms.Label();
             this.colorDialog = new System.Windows.Forms.ColorDialog();
+            this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
             this.mainMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.thumbiconPictureBox)).BeginInit();
             this.thumbiconPanel.SuspendLayout();
@@ -88,6 +92,8 @@
             // 
             this.fileMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.openFileMenuItem,
+            this.toolStripSeparator2,
+            this.saveFileMenuItem,
             this.toolStripSeparator1,
             this.exitFileMenuItem});
             this.fileMenuItem.Name = "fileMenuItem";
@@ -98,20 +104,33 @@
             // 
             this.openFileMenuItem.Name = "openFileMenuItem";
             this.openFileMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.O)));
-            this.openFileMenuItem.Size = new System.Drawing.Size(235, 34);
+            this.openFileMenuItem.Size = new System.Drawing.Size(304, 34);
             this.openFileMenuItem.Text = "&Open...";
             this.openFileMenuItem.Click += new System.EventHandler(this.OpenFileMenuItem_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(301, 6);
+            // 
+            // saveFileMenuItem
+            // 
+            this.saveFileMenuItem.Name = "saveFileMenuItem";
+            this.saveFileMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveFileMenuItem.Size = new System.Drawing.Size(304, 34);
+            this.saveFileMenuItem.Text = "&Save Image As...";
+            this.saveFileMenuItem.Click += new System.EventHandler(this.SaveFileMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(232, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(301, 6);
             // 
             // exitFileMenuItem
             // 
             this.exitFileMenuItem.Name = "exitFileMenuItem";
             this.exitFileMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.F4)));
-            this.exitFileMenuItem.Size = new System.Drawing.Size(235, 34);
+            this.exitFileMenuItem.Size = new System.Drawing.Size(304, 34);
             this.exitFileMenuItem.Text = "E&xit";
             this.exitFileMenuItem.Click += new System.EventHandler(this.ExitFileMenuItem_Click);
             // 
@@ -127,8 +146,8 @@
             // 
             this.copyEditMenuItem.Name = "copyEditMenuItem";
             this.copyEditMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyEditMenuItem.Size = new System.Drawing.Size(218, 34);
-            this.copyEditMenuItem.Text = "&Copy";
+            this.copyEditMenuItem.Size = new System.Drawing.Size(273, 34);
+            this.copyEditMenuItem.Text = "&Copy Image";
             this.copyEditMenuItem.Click += new System.EventHandler(this.CopyEditMenuItem_Click);
             // 
             // imageMenuItem
@@ -261,9 +280,9 @@
             this.thumbiconPanel.BackColor = System.Drawing.SystemColors.Control;
             this.thumbiconPanel.Controls.Add(this.thumbiconPictureBox);
             this.thumbiconPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.thumbiconPanel.Location = new System.Drawing.Point(0, 92);
+            this.thumbiconPanel.Location = new System.Drawing.Point(0, 96);
             this.thumbiconPanel.Name = "thumbiconPanel";
-            this.thumbiconPanel.Size = new System.Drawing.Size(1002, 620);
+            this.thumbiconPanel.Size = new System.Drawing.Size(1002, 616);
             this.thumbiconPanel.TabIndex = 2;
             // 
             // toolbarTableLayoutPanel
@@ -283,7 +302,7 @@
             this.toolbarTableLayoutPanel.Padding = new System.Windows.Forms.Padding(8);
             this.toolbarTableLayoutPanel.RowCount = 1;
             this.toolbarTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.toolbarTableLayoutPanel.Size = new System.Drawing.Size(1002, 59);
+            this.toolbarTableLayoutPanel.Size = new System.Drawing.Size(1002, 63);
             this.toolbarTableLayoutPanel.TabIndex = 3;
             // 
             // desiredSizeFlowLayoutPanel
@@ -293,25 +312,26 @@
             this.desiredSizeFlowLayoutPanel.Controls.Add(this.widthNumericUpDown);
             this.desiredSizeFlowLayoutPanel.Controls.Add(this.xLabel);
             this.desiredSizeFlowLayoutPanel.Controls.Add(this.heightNumericUpDown);
+            this.desiredSizeFlowLayoutPanel.Controls.Add(this.desiredSizeOkButton);
             this.desiredSizeFlowLayoutPanel.Location = new System.Drawing.Point(11, 11);
             this.desiredSizeFlowLayoutPanel.Name = "desiredSizeFlowLayoutPanel";
-            this.desiredSizeFlowLayoutPanel.Size = new System.Drawing.Size(338, 37);
+            this.desiredSizeFlowLayoutPanel.Size = new System.Drawing.Size(390, 41);
             this.desiredSizeFlowLayoutPanel.TabIndex = 3;
             // 
             // desiredSizeLabel
             // 
             this.desiredSizeLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.desiredSizeLabel.AutoSize = true;
-            this.desiredSizeLabel.Location = new System.Drawing.Point(3, 6);
+            this.desiredSizeLabel.Location = new System.Drawing.Point(3, 8);
             this.desiredSizeLabel.Name = "desiredSizeLabel";
-            this.desiredSizeLabel.Size = new System.Drawing.Size(106, 25);
+            this.desiredSizeLabel.Size = new System.Drawing.Size(110, 25);
             this.desiredSizeLabel.TabIndex = 0;
-            this.desiredSizeLabel.Text = "Desired size";
+            this.desiredSizeLabel.Text = "Desired size:";
             // 
             // widthNumericUpDown
             // 
             this.widthNumericUpDown.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.widthNumericUpDown.Location = new System.Drawing.Point(115, 3);
+            this.widthNumericUpDown.Location = new System.Drawing.Point(119, 5);
             this.widthNumericUpDown.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -325,13 +345,12 @@
             0,
             0,
             0});
-            this.widthNumericUpDown.ValueChanged += new System.EventHandler(this.WidthNumericUpDown_ValueChanged);
             // 
             // xLabel
             // 
             this.xLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.xLabel.AutoSize = true;
-            this.xLabel.Location = new System.Drawing.Point(215, 6);
+            this.xLabel.Location = new System.Drawing.Point(219, 8);
             this.xLabel.Name = "xLabel";
             this.xLabel.Size = new System.Drawing.Size(20, 25);
             this.xLabel.TabIndex = 3;
@@ -341,7 +360,7 @@
             // heightNumericUpDown
             // 
             this.heightNumericUpDown.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.heightNumericUpDown.Location = new System.Drawing.Point(241, 3);
+            this.heightNumericUpDown.Location = new System.Drawing.Point(245, 5);
             this.heightNumericUpDown.Maximum = new decimal(new int[] {
             10000,
             0,
@@ -356,14 +375,31 @@
             0,
             0});
             // 
+            // desiredSizeOkButton
+            // 
+            this.desiredSizeOkButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.desiredSizeOkButton.AutoSize = true;
+            this.desiredSizeOkButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.desiredSizeOkButton.Location = new System.Drawing.Point(345, 3);
+            this.desiredSizeOkButton.Name = "desiredSizeOkButton";
+            this.desiredSizeOkButton.Size = new System.Drawing.Size(42, 35);
+            this.desiredSizeOkButton.TabIndex = 5;
+            this.desiredSizeOkButton.Text = "ok";
+            this.desiredSizeOkButton.UseVisualStyleBackColor = true;
+            this.desiredSizeOkButton.Click += new System.EventHandler(this.DesiredSizeOkButton_Click);
+            // 
             // returnedSizeLabel
             // 
             this.returnedSizeLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.returnedSizeLabel.AutoSize = true;
-            this.returnedSizeLabel.Location = new System.Drawing.Point(991, 17);
+            this.returnedSizeLabel.Location = new System.Drawing.Point(991, 19);
             this.returnedSizeLabel.Name = "returnedSizeLabel";
             this.returnedSizeLabel.Size = new System.Drawing.Size(0, 25);
             this.returnedSizeLabel.TabIndex = 4;
+            // 
+            // saveFileDialog
+            // 
+            this.saveFileDialog.Filter = "Bitmap (*.bmp)|*.bmp|GIF (*.gif)|*.gif|JPEG (*.jpg)|*.jpg|PNG (*.png)|*.png";
             // 
             // MainForm
             // 
@@ -430,5 +466,9 @@
         private ToolStripMenuItem wideThumbnailsImageMenuItem;
         private ToolStripMenuItem iconBackgroundImageMenuItem;
         private ToolStripMenuItem scaleUpImageMenuItem;
+        private Button desiredSizeOkButton;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripMenuItem saveFileMenuItem;
+        private SaveFileDialog saveFileDialog;
     }
 }
