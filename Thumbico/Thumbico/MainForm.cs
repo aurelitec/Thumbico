@@ -39,7 +39,6 @@ namespace Thumbico
             set
             {
                 this.thumbiconSize = value;
-                // this.desiredSizeStatusBarPanel.Text = $"Desired size: {this.thumbiconSize.Width} x {this.thumbiconSize.Height}";
                 this.ReloadThumbicon();
             }
         }
@@ -173,7 +172,32 @@ namespace Thumbico
         // Toolbar Event Handlers
         // *************************************
 
-        private void DesiredSizeOkButton_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Applies a new custom or predefined size by reloading a thumbicon of that size.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An object that contains no event data.</param>
+        private void SizeComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            customSizeFlowLayoutPanel.Visible = sizeComboBox.SelectedIndex == 0;
+
+            if (sizeComboBox.SelectedIndex == 0)
+            {
+                sizeApplyButton.PerformClick();
+            }
+            else
+            {
+                IEnumerable<int> size = sizeComboBox.Text.Split('x').Select(s => int.Parse(s.Trim()));
+                this.ThumbiconSize = new Size(size.First(), size.Last());
+            }
+        }
+
+        /// <summary>
+        /// Applies a new custom size by reloading a thumbicon of that size.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">An object that contains no event data.</param>
+        private void SizeApplyButton_Click(object sender, EventArgs e)
         {
             this.ThumbiconSize = new Size((int)widthNumericUpDown.Value, (int)heightNumericUpDown.Value);
         }
@@ -213,7 +237,6 @@ namespace Thumbico
                 }
             }
         }
-
 
         /// <summary>
         /// Closes the main form (and the app).
@@ -273,6 +296,5 @@ namespace Thumbico
                 this.thumbiconPanel.BackColor = this.colorDialog.Color;
             }
         }
-
     }
 }

@@ -49,18 +49,19 @@
             this.iconBackgroundImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scaleUpImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.backgroundColorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.backgroundColorViewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
             this.thumbiconPictureBox = new System.Windows.Forms.PictureBox();
             this.thumbiconPanel = new System.Windows.Forms.Panel();
             this.toolbarTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
-            this.desiredSizeFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.desiredSizeLabel = new System.Windows.Forms.Label();
+            this.sizeFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.sizeComboBox = new System.Windows.Forms.ComboBox();
+            this.customSizeFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.widthNumericUpDown = new System.Windows.Forms.NumericUpDown();
             this.xLabel = new System.Windows.Forms.Label();
             this.heightNumericUpDown = new System.Windows.Forms.NumericUpDown();
-            this.desiredSizeOkButton = new System.Windows.Forms.Button();
+            this.sizeApplyButton = new System.Windows.Forms.Button();
             this.returnedSizeLabel = new System.Windows.Forms.Label();
             this.colorDialog = new System.Windows.Forms.ColorDialog();
             this.saveFileDialog = new System.Windows.Forms.SaveFileDialog();
@@ -68,7 +69,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.thumbiconPictureBox)).BeginInit();
             this.thumbiconPanel.SuspendLayout();
             this.toolbarTableLayoutPanel.SuspendLayout();
-            this.desiredSizeFlowLayoutPanel.SuspendLayout();
+            this.sizeFlowLayoutPanel.SuspendLayout();
+            this.customSizeFlowLayoutPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.widthNumericUpDown)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.heightNumericUpDown)).BeginInit();
             this.SuspendLayout();
@@ -242,17 +244,17 @@
             // viewMenuItem
             // 
             this.viewMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.backgroundColorToolStripMenuItem});
+            this.backgroundColorViewMenuItem});
             this.viewMenuItem.Name = "viewMenuItem";
             this.viewMenuItem.Size = new System.Drawing.Size(65, 29);
             this.viewMenuItem.Text = "&View";
             // 
-            // backgroundColorToolStripMenuItem
+            // backgroundColorViewMenuItem
             // 
-            this.backgroundColorToolStripMenuItem.Name = "backgroundColorToolStripMenuItem";
-            this.backgroundColorToolStripMenuItem.Size = new System.Drawing.Size(269, 34);
-            this.backgroundColorToolStripMenuItem.Text = "&Background Color...";
-            this.backgroundColorToolStripMenuItem.Click += new System.EventHandler(this.BackgroundColorViewMenuItem_Click);
+            this.backgroundColorViewMenuItem.Name = "backgroundColorViewMenuItem";
+            this.backgroundColorViewMenuItem.Size = new System.Drawing.Size(269, 34);
+            this.backgroundColorViewMenuItem.Text = "&Background Color...";
+            this.backgroundColorViewMenuItem.Click += new System.EventHandler(this.BackgroundColorViewMenuItem_Click);
             // 
             // helpMenuItem
             // 
@@ -267,7 +269,7 @@
             // thumbiconPictureBox
             // 
             this.thumbiconPictureBox.BackColor = System.Drawing.Color.Transparent;
-            this.thumbiconPictureBox.Location = new System.Drawing.Point(373, 182);
+            this.thumbiconPictureBox.Location = new System.Drawing.Point(373, 183);
             this.thumbiconPictureBox.Name = "thumbiconPictureBox";
             this.thumbiconPictureBox.Size = new System.Drawing.Size(256, 256);
             this.thumbiconPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -280,9 +282,9 @@
             this.thumbiconPanel.BackColor = System.Drawing.SystemColors.Control;
             this.thumbiconPanel.Controls.Add(this.thumbiconPictureBox);
             this.thumbiconPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.thumbiconPanel.Location = new System.Drawing.Point(0, 96);
+            this.thumbiconPanel.Location = new System.Drawing.Point(0, 90);
             this.thumbiconPanel.Name = "thumbiconPanel";
-            this.thumbiconPanel.Size = new System.Drawing.Size(1002, 616);
+            this.thumbiconPanel.Size = new System.Drawing.Size(1002, 622);
             this.thumbiconPanel.TabIndex = 2;
             // 
             // toolbarTableLayoutPanel
@@ -290,11 +292,9 @@
             this.toolbarTableLayoutPanel.AutoSize = true;
             this.toolbarTableLayoutPanel.BackColor = System.Drawing.SystemColors.ControlLight;
             this.toolbarTableLayoutPanel.ColumnCount = 2;
-            this.toolbarTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.toolbarTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.toolbarTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.toolbarTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.toolbarTableLayoutPanel.Controls.Add(this.desiredSizeFlowLayoutPanel, 0, 0);
+            this.toolbarTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75F));
+            this.toolbarTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.toolbarTableLayoutPanel.Controls.Add(this.sizeFlowLayoutPanel, 0, 0);
             this.toolbarTableLayoutPanel.Controls.Add(this.returnedSizeLabel, 1, 0);
             this.toolbarTableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.toolbarTableLayoutPanel.Location = new System.Drawing.Point(0, 33);
@@ -302,43 +302,71 @@
             this.toolbarTableLayoutPanel.Padding = new System.Windows.Forms.Padding(8);
             this.toolbarTableLayoutPanel.RowCount = 1;
             this.toolbarTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.toolbarTableLayoutPanel.Size = new System.Drawing.Size(1002, 63);
+            this.toolbarTableLayoutPanel.Size = new System.Drawing.Size(1002, 57);
             this.toolbarTableLayoutPanel.TabIndex = 3;
             // 
-            // desiredSizeFlowLayoutPanel
+            // sizeFlowLayoutPanel
             // 
-            this.desiredSizeFlowLayoutPanel.AutoSize = true;
-            this.desiredSizeFlowLayoutPanel.Controls.Add(this.desiredSizeLabel);
-            this.desiredSizeFlowLayoutPanel.Controls.Add(this.widthNumericUpDown);
-            this.desiredSizeFlowLayoutPanel.Controls.Add(this.xLabel);
-            this.desiredSizeFlowLayoutPanel.Controls.Add(this.heightNumericUpDown);
-            this.desiredSizeFlowLayoutPanel.Controls.Add(this.desiredSizeOkButton);
-            this.desiredSizeFlowLayoutPanel.Location = new System.Drawing.Point(11, 11);
-            this.desiredSizeFlowLayoutPanel.Name = "desiredSizeFlowLayoutPanel";
-            this.desiredSizeFlowLayoutPanel.Size = new System.Drawing.Size(390, 41);
-            this.desiredSizeFlowLayoutPanel.TabIndex = 3;
+            this.sizeFlowLayoutPanel.AutoSize = true;
+            this.sizeFlowLayoutPanel.Controls.Add(this.sizeComboBox);
+            this.sizeFlowLayoutPanel.Controls.Add(this.customSizeFlowLayoutPanel);
+            this.sizeFlowLayoutPanel.Location = new System.Drawing.Point(11, 11);
+            this.sizeFlowLayoutPanel.MinimumSize = new System.Drawing.Size(0, 35);
+            this.sizeFlowLayoutPanel.Name = "sizeFlowLayoutPanel";
+            this.sizeFlowLayoutPanel.Size = new System.Drawing.Size(461, 35);
+            this.sizeFlowLayoutPanel.TabIndex = 3;
             // 
-            // desiredSizeLabel
+            // sizeComboBox
             // 
-            this.desiredSizeLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.desiredSizeLabel.AutoSize = true;
-            this.desiredSizeLabel.Location = new System.Drawing.Point(3, 8);
-            this.desiredSizeLabel.Name = "desiredSizeLabel";
-            this.desiredSizeLabel.Size = new System.Drawing.Size(110, 25);
-            this.desiredSizeLabel.TabIndex = 0;
-            this.desiredSizeLabel.Text = "Desired size:";
+            this.sizeComboBox.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.sizeComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.sizeComboBox.FormattingEnabled = true;
+            this.sizeComboBox.Items.AddRange(new object[] {
+            "Custom size",
+            "16 x 16",
+            "24 x 24",
+            "32 x 32",
+            "48 x 48",
+            "64 x 64",
+            "96 x 96",
+            "128 x 128",
+            "192 x 192",
+            "256 x 256",
+            "512 x 512",
+            "1024 x 1024"});
+            this.sizeComboBox.Location = new System.Drawing.Point(0, 1);
+            this.sizeComboBox.Margin = new System.Windows.Forms.Padding(0, 0, 6, 0);
+            this.sizeComboBox.Name = "sizeComboBox";
+            this.sizeComboBox.Size = new System.Drawing.Size(182, 33);
+            this.sizeComboBox.TabIndex = 6;
+            this.sizeComboBox.SelectedIndexChanged += new System.EventHandler(this.SizeComboBox_SelectedIndexChanged);
+            // 
+            // customSizeFlowLayoutPanel
+            // 
+            this.customSizeFlowLayoutPanel.AutoSize = true;
+            this.customSizeFlowLayoutPanel.Controls.Add(this.widthNumericUpDown);
+            this.customSizeFlowLayoutPanel.Controls.Add(this.xLabel);
+            this.customSizeFlowLayoutPanel.Controls.Add(this.heightNumericUpDown);
+            this.customSizeFlowLayoutPanel.Controls.Add(this.sizeApplyButton);
+            this.customSizeFlowLayoutPanel.Location = new System.Drawing.Point(188, 0);
+            this.customSizeFlowLayoutPanel.Margin = new System.Windows.Forms.Padding(0);
+            this.customSizeFlowLayoutPanel.Name = "customSizeFlowLayoutPanel";
+            this.customSizeFlowLayoutPanel.Size = new System.Drawing.Size(273, 35);
+            this.customSizeFlowLayoutPanel.TabIndex = 7;
             // 
             // widthNumericUpDown
             // 
             this.widthNumericUpDown.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.widthNumericUpDown.Location = new System.Drawing.Point(119, 5);
+            this.widthNumericUpDown.AutoSize = true;
+            this.widthNumericUpDown.Location = new System.Drawing.Point(0, 2);
+            this.widthNumericUpDown.Margin = new System.Windows.Forms.Padding(0);
             this.widthNumericUpDown.Maximum = new decimal(new int[] {
             10000,
             0,
             0,
             0});
             this.widthNumericUpDown.Name = "widthNumericUpDown";
-            this.widthNumericUpDown.Size = new System.Drawing.Size(94, 31);
+            this.widthNumericUpDown.Size = new System.Drawing.Size(86, 31);
             this.widthNumericUpDown.TabIndex = 1;
             this.widthNumericUpDown.Value = new decimal(new int[] {
             256,
@@ -350,7 +378,7 @@
             // 
             this.xLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.xLabel.AutoSize = true;
-            this.xLabel.Location = new System.Drawing.Point(219, 8);
+            this.xLabel.Location = new System.Drawing.Point(89, 5);
             this.xLabel.Name = "xLabel";
             this.xLabel.Size = new System.Drawing.Size(20, 25);
             this.xLabel.TabIndex = 3;
@@ -360,14 +388,16 @@
             // heightNumericUpDown
             // 
             this.heightNumericUpDown.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.heightNumericUpDown.Location = new System.Drawing.Point(245, 5);
+            this.heightNumericUpDown.AutoSize = true;
+            this.heightNumericUpDown.Location = new System.Drawing.Point(112, 2);
+            this.heightNumericUpDown.Margin = new System.Windows.Forms.Padding(0);
             this.heightNumericUpDown.Maximum = new decimal(new int[] {
             10000,
             0,
             0,
             0});
             this.heightNumericUpDown.Name = "heightNumericUpDown";
-            this.heightNumericUpDown.Size = new System.Drawing.Size(94, 31);
+            this.heightNumericUpDown.Size = new System.Drawing.Size(86, 31);
             this.heightNumericUpDown.TabIndex = 4;
             this.heightNumericUpDown.Value = new decimal(new int[] {
             256,
@@ -375,24 +405,25 @@
             0,
             0});
             // 
-            // desiredSizeOkButton
+            // sizeApplyButton
             // 
-            this.desiredSizeOkButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.desiredSizeOkButton.AutoSize = true;
-            this.desiredSizeOkButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.desiredSizeOkButton.Location = new System.Drawing.Point(345, 3);
-            this.desiredSizeOkButton.Name = "desiredSizeOkButton";
-            this.desiredSizeOkButton.Size = new System.Drawing.Size(42, 35);
-            this.desiredSizeOkButton.TabIndex = 5;
-            this.desiredSizeOkButton.Text = "ok";
-            this.desiredSizeOkButton.UseVisualStyleBackColor = true;
-            this.desiredSizeOkButton.Click += new System.EventHandler(this.DesiredSizeOkButton_Click);
+            this.sizeApplyButton.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.sizeApplyButton.AutoSize = true;
+            this.sizeApplyButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.sizeApplyButton.Location = new System.Drawing.Point(204, 0);
+            this.sizeApplyButton.Margin = new System.Windows.Forms.Padding(6, 0, 0, 0);
+            this.sizeApplyButton.Name = "sizeApplyButton";
+            this.sizeApplyButton.Size = new System.Drawing.Size(69, 35);
+            this.sizeApplyButton.TabIndex = 5;
+            this.sizeApplyButton.Text = "&Apply";
+            this.sizeApplyButton.UseVisualStyleBackColor = true;
+            this.sizeApplyButton.Click += new System.EventHandler(this.SizeApplyButton_Click);
             // 
             // returnedSizeLabel
             // 
             this.returnedSizeLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.returnedSizeLabel.AutoSize = true;
-            this.returnedSizeLabel.Location = new System.Drawing.Point(991, 19);
+            this.returnedSizeLabel.Location = new System.Drawing.Point(991, 16);
             this.returnedSizeLabel.Name = "returnedSizeLabel";
             this.returnedSizeLabel.Size = new System.Drawing.Size(0, 25);
             this.returnedSizeLabel.TabIndex = 4;
@@ -423,8 +454,10 @@
             this.thumbiconPanel.PerformLayout();
             this.toolbarTableLayoutPanel.ResumeLayout(false);
             this.toolbarTableLayoutPanel.PerformLayout();
-            this.desiredSizeFlowLayoutPanel.ResumeLayout(false);
-            this.desiredSizeFlowLayoutPanel.PerformLayout();
+            this.sizeFlowLayoutPanel.ResumeLayout(false);
+            this.sizeFlowLayoutPanel.PerformLayout();
+            this.customSizeFlowLayoutPanel.ResumeLayout(false);
+            this.customSizeFlowLayoutPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.widthNumericUpDown)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.heightNumericUpDown)).EndInit();
             this.ResumeLayout(false);
@@ -446,13 +479,12 @@
         private PictureBox thumbiconPictureBox;
         private Panel thumbiconPanel;
         private TableLayoutPanel toolbarTableLayoutPanel;
-        private FlowLayoutPanel desiredSizeFlowLayoutPanel;
-        private Label desiredSizeLabel;
+        private FlowLayoutPanel sizeFlowLayoutPanel;
         private NumericUpDown widthNumericUpDown;
         private Label xLabel;
         private NumericUpDown heightNumericUpDown;
         private Label returnedSizeLabel;
-        private ToolStripMenuItem backgroundColorToolStripMenuItem;
+        private ToolStripMenuItem backgroundColorViewMenuItem;
         private ColorDialog colorDialog;
         private ToolStripMenuItem copyEditMenuItem;
         private ToolStripMenuItem imageMenuItem;
@@ -466,9 +498,11 @@
         private ToolStripMenuItem wideThumbnailsImageMenuItem;
         private ToolStripMenuItem iconBackgroundImageMenuItem;
         private ToolStripMenuItem scaleUpImageMenuItem;
-        private Button desiredSizeOkButton;
+        private Button sizeApplyButton;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem saveFileMenuItem;
         private SaveFileDialog saveFileDialog;
+        private ComboBox sizeComboBox;
+        private FlowLayoutPanel customSizeFlowLayoutPanel;
     }
 }
