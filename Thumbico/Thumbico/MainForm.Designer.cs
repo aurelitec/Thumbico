@@ -49,6 +49,7 @@
             this.iconBackgroundImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.scaleUpImageMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.viewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.fullScreenPreviewViewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.backgroundColorViewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.openFileDialog = new System.Windows.Forms.OpenFileDialog();
@@ -244,16 +245,25 @@
             // viewMenuItem
             // 
             this.viewMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fullScreenPreviewViewMenuItem,
             this.backgroundColorViewMenuItem});
             this.viewMenuItem.Name = "viewMenuItem";
             this.viewMenuItem.Size = new System.Drawing.Size(65, 29);
             this.viewMenuItem.Text = "&View";
             // 
+            // fullScreenPreviewViewMenuItem
+            // 
+            this.fullScreenPreviewViewMenuItem.Name = "fullScreenPreviewViewMenuItem";
+            this.fullScreenPreviewViewMenuItem.ShortcutKeys = System.Windows.Forms.Keys.F11;
+            this.fullScreenPreviewViewMenuItem.Size = new System.Drawing.Size(334, 34);
+            this.fullScreenPreviewViewMenuItem.Text = "Toggle Preview Mode";
+            this.fullScreenPreviewViewMenuItem.Click += new System.EventHandler(this.TogglePreviewModeViewMenuItem_Click);
+            // 
             // backgroundColorViewMenuItem
             // 
             this.backgroundColorViewMenuItem.Name = "backgroundColorViewMenuItem";
-            this.backgroundColorViewMenuItem.Size = new System.Drawing.Size(269, 34);
-            this.backgroundColorViewMenuItem.Text = "&Background Color...";
+            this.backgroundColorViewMenuItem.Size = new System.Drawing.Size(334, 34);
+            this.backgroundColorViewMenuItem.Text = "Preview &Background Color...";
             this.backgroundColorViewMenuItem.Click += new System.EventHandler(this.BackgroundColorViewMenuItem_Click);
             // 
             // helpMenuItem
@@ -268,7 +278,8 @@
             // 
             // thumbiconPictureBox
             // 
-            this.thumbiconPictureBox.BackColor = System.Drawing.Color.Transparent;
+            this.thumbiconPictureBox.BackColor = System.Drawing.SystemColors.Window;
+            this.thumbiconPictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.thumbiconPictureBox.Location = new System.Drawing.Point(373, 183);
             this.thumbiconPictureBox.Name = "thumbiconPictureBox";
             this.thumbiconPictureBox.Size = new System.Drawing.Size(256, 256);
@@ -441,11 +452,14 @@
             this.Controls.Add(this.thumbiconPanel);
             this.Controls.Add(this.toolbarTableLayoutPanel);
             this.Controls.Add(this.mainMenuStrip);
+            this.KeyPreview = true;
             this.MainMenuStrip = this.mainMenuStrip;
             this.Name = "MainForm";
             this.Text = "Thumbico";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.MainForm_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.MainForm_DragEnter);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             this.Resize += new System.EventHandler(this.MainForm_Resize);
             this.mainMenuStrip.ResumeLayout(false);
             this.mainMenuStrip.PerformLayout();
@@ -504,5 +518,6 @@
         private SaveFileDialog saveFileDialog;
         private ComboBox sizeComboBox;
         private FlowLayoutPanel customSizeFlowLayoutPanel;
+        private ToolStripMenuItem fullScreenPreviewViewMenuItem;
     }
 }
