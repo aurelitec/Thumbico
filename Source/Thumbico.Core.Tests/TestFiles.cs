@@ -18,6 +18,10 @@ internal static class TestFiles
 
     private static readonly Lazy<string> WideImage = new(() => CreateImage("wide.png", 512, 256));
 
+    private static readonly Lazy<string> RedTopBlueBottom = new(CreateRedTopBlueBottomImage);
+
+    private static readonly Lazy<string> RedTopBlueBottomIcon = new(CreateRedTopBlueBottomIcon);
+
     private static readonly Lazy<string> Text = new(CreateTextFile);
 
     /// <summary>Gets an image file, which the shell can render as a real thumbnail.</summary>
@@ -25,6 +29,14 @@ internal static class TestFiles
 
     /// <summary>Gets a non-square image, used to prove that rotation swaps the dimensions.</summary>
     internal static string WideImageFile => WideImage.Value;
+
+    /// <summary>Gets an image with a red band at the top and a blue one at the bottom, so that a
+    /// vertically flipped result is unmistakable.</summary>
+    internal static string RedTopBlueBottomFile => RedTopBlueBottom.Value;
+
+    /// <summary>Gets the same red-over-blue image as an icon file, so that the icon path can be
+    /// checked for orientation as precisely as the thumbnail path.</summary>
+    internal static string RedTopBlueBottomIconFile => RedTopBlueBottomIcon.Value;
 
     /// <summary>Gets a plain text file, which has no thumbnail and so falls back to an icon.</summary>
     internal static string TextFile => Text.Value;
@@ -54,6 +66,60 @@ internal static class TestFiles
         }
 
         bitmap.Save(path, ImageFormat.Png);
+
+        return path;
+    }
+
+    private static string CreateRedTopBlueBottomImage()
+    {
+        string path = Path.Combine(Directory.Value, "red-top-blue-bottom.png");
+
+        using Bitmap bitmap = new(400, 400, PixelFormat.Format32bppArgb);
+        using (Graphics graphics = Graphics.FromImage(bitmap))
+        {
+            graphics.Clear(Color.White);
+            graphics.FillRectangle(Brushes.Red, 0, 0, 400, 120);
+            graphics.FillRectangle(Brushes.Blue, 0, 280, 400, 120);
+        }
+
+        bitmap.Save(path, ImageFormat.Png);
+
+        return path;
+    }
+
+    /// <summary>
+    /// Writes a single-image icon file wrapping a PNG, which is the modern icon layout and the
+    /// simplest one to author.
+    /// </summary>
+    private static string CreateRedTopBlueBottomIcon()
+    {
+        string path = Path.Combine(Directory.Value, "red-top-blue-bottom.ico");
+
+        using Bitmap bitmap = new(256, 256, PixelFormat.Format32bppArgb);
+        using (Graphics graphics = Graphics.FromImage(bitmap))
+        {
+            graphics.Clear(Color.White);
+            graphics.FillRectangle(Brushes.Red, 0, 0, 256, 70);
+            graphics.FillRectangle(Brushes.Blue, 0, 186, 256, 70);
+        }
+
+        using MemoryStream png = new();
+        bitmap.Save(png, ImageFormat.Png);
+        byte[] image = png.ToArray();
+
+        using BinaryWriter writer = new(File.Create(path));
+        writer.Write((ushort)0);
+        writer.Write((ushort)1);
+        writer.Write((ushort)1);
+        writer.Write((byte)0);
+        writer.Write((byte)0);
+        writer.Write((byte)0);
+        writer.Write((byte)0);
+        writer.Write((ushort)1);
+        writer.Write((ushort)32);
+        writer.Write(image.Length);
+        writer.Write(22);
+        writer.Write(image);
 
         return path;
     }

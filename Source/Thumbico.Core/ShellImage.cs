@@ -3,6 +3,7 @@
 
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
@@ -28,6 +29,7 @@ internal static class ShellImage
 
         SIZE requested = new() { cx = size.Width, cy = size.Height };
         SIIGBF flags = ToNativeFlags(options);
+        Bitmap bitmap;
 
         // Auto asks for a real thumbnail first so callers get the richest image available, and
         // falls back to the icon for the many items that have no thumbnail at all.
@@ -36,19 +38,29 @@ internal static class ShellImage
             if (TryGetBitmap(factory, requested, flags | SIIGBF.SIIGBF_THUMBNAILONLY, out Bitmap? thumbnail))
             {
                 isIcon = false;
-                return thumbnail;
+                bitmap = thumbnail;
             }
-
-            isIcon = true;
-            return GetBitmap(factory, requested, flags | SIIGBF.SIIGBF_ICONONLY);
+            else
+            {
+                isIcon = true;
+                bitmap = GetBitmap(factory, requested, flags | SIIGBF.SIIGBF_ICONONLY);
+            }
+        }
+        else
+        {
+            isIcon = source == ThumbicoSource.IconOnly;
+            SIIGBF sourceFlag = isIcon ? SIIGBF.SIIGBF_ICONONLY : SIIGBF.SIIGBF_THUMBNAILONLY;
+            bitmap = GetBitmap(factory, requested, flags | sourceFlag);
         }
 
-        isIcon = source == ThumbicoSource.IconOnly;
-        SIIGBF sourceFlag = source == ThumbicoSource.IconOnly
-            ? SIIGBF.SIIGBF_ICONONLY
-            : SIIGBF.SIIGBF_THUMBNAILONLY;
+        // Icons come back bottom-up and thumbnails top-down, while the DIB header reports a
+        // positive height for both. Which kind was returned is the only thing that tells them apart.
+        if (isIcon)
+        {
+            bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
+        }
 
-        return GetBitmap(factory, requested, flags | sourceFlag);
+        return bitmap;
     }
 
     private static bool TryGetBitmap(
@@ -87,53 +99,32 @@ internal static class ShellImage
     /// </remarks>
     private static unsafe Bitmap ToManagedBitmap(DeleteObjectSafeHandle hbitmap)
     {
-        DIBSECTION dib = default;
-        Span<byte> buffer = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref dib, 1));
+        BITMAP info = default;
+        Span<byte> buffer = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref info, 1));
         int copied = PInvoke.GetObject(hbitmap, buffer);
 
-        // Anything that is not a 32-bit DIB section has no alpha channel worth preserving, so the
-        // plain GDI+ conversion is already correct for it.
-        if (copied < buffer.Length || dib.dsBmih.biBitCount != 32)
+        // Anything that is not 32 bits per pixel has no alpha channel worth preserving, and its rows
+        // would not match the stride the wrapper below assumes.
+        if (copied < buffer.Length || info.bmBitsPixel != 32)
         {
             return Image.FromHbitmap(hbitmap.DangerousGetHandle());
         }
 
-        int width = dib.dsBm.bmWidth;
-        int height = Math.Abs(dib.dsBmih.biHeight);
-        int sourceStride = dib.dsBm.bmWidthBytes;
-        byte* sourceRow = (byte*)dib.dsBm.bmBits;
+        // The first bitmap borrows the shell's pixels, the second owns them. The copy is what makes
+        // the result outlive the native bitmap, which the caller frees as soon as this returns.
+        using Bitmap borrowed = new(
+            info.bmWidth, info.bmHeight, info.bmWidthBytes, PixelFormat.Format32bppArgb, (nint)info.bmBits);
 
-        // A positive height means the rows are stored bottom-up. Walking them in reverse is what
-        // keeps icons upright, without a corrective flip afterwards.
-        if (dib.dsBmih.biHeight > 0)
+        Bitmap owned = new(info.bmWidth, info.bmHeight, PixelFormat.Format32bppArgb);
+        using (Graphics graphics = Graphics.FromImage(owned))
         {
-            sourceRow += (long)(height - 1) * sourceStride;
-            sourceStride = -sourceStride;
+            // Take the pixels as they are. The default mode would blend them into the transparent
+            // canvas and quietly alter the alpha.
+            graphics.CompositingMode = CompositingMode.SourceCopy;
+            graphics.DrawImageUnscaled(borrowed, 0, 0);
         }
 
-        // The pixels must be copied rather than wrapped: the caller frees the native bitmap as soon
-        // as this returns, and GDI+ hands back a view rather than a copy when the format matches.
-        Bitmap bitmap = new(width, height, PixelFormat.Format32bppArgb);
-        BitmapData target = bitmap.LockBits(
-            new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
-        try
-        {
-            long rowBytes = (long)width * 4;
-            byte* targetRow = (byte*)target.Scan0;
-
-            for (int y = 0; y < height; y++)
-            {
-                Buffer.MemoryCopy(sourceRow, targetRow, rowBytes, rowBytes);
-                sourceRow += sourceStride;
-                targetRow += target.Stride;
-            }
-        }
-        finally
-        {
-            bitmap.UnlockBits(target);
-        }
-
-        return bitmap;
+        return owned;
     }
 
     private static SIIGBF ToNativeFlags(ThumbicoOptions options)

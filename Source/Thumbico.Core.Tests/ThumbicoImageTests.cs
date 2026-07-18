@@ -126,17 +126,28 @@ public class ThumbicoImageTests
         Assert.True(HasTransparentPixel(thumbico.Bitmap), "Expected at least one transparent pixel.");
     }
 
-    [Fact]
-    public void WhenIconIsReturnedThenItIsNotUpsideDown()
+    /// <summary>
+    /// The shell hands back icons bottom-up and thumbnails top-down while reporting a positive
+    /// height for both, so the returned kind is the only thing that says which correction to apply.
+    /// That rule is undocumented, which is exactly why both paths are pinned here: if a future
+    /// Windows release changes it, these fail loudly instead of shipping flipped images.
+    /// </summary>
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void WhenImageIsReturnedThenTheTopOfItStaysAtTheTop(bool asIcon)
     {
-        using ThumbicoImage thumbico = ThumbicoImage.FromPath(
-            TestFiles.TextFile, RequestedSize, ThumbicoSource.IconOnly);
+        string path = asIcon ? TestFiles.RedTopBlueBottomIconFile : TestFiles.RedTopBlueBottomFile;
+        ThumbicoSource source = asIcon ? ThumbicoSource.IconOnly : ThumbicoSource.ThumbnailOnly;
 
-        // A document icon is a page: its top half is emptier than its bottom half. If the rows were
-        // flipped, the opaque weight would sit at the top instead.
-        (int top, int bottom) = OpaquePixelsPerHalf(thumbico.Bitmap);
+        using ThumbicoImage thumbico = ThumbicoImage.FromPath(path, RequestedSize, source);
 
-        Assert.True(bottom > top, $"Expected more opaque pixels in the lower half, got top={top} bottom={bottom}.");
+        int middle = thumbico.Size.Width / 2;
+        Color top = thumbico.Bitmap.GetPixel(middle, thumbico.Size.Height / 8);
+        Color bottom = thumbico.Bitmap.GetPixel(middle, thumbico.Size.Height * 7 / 8);
+
+        Assert.True(top.R > 150 && top.B < 100, $"Expected a red band at the top, found {top}.");
+        Assert.True(bottom.B > 150 && bottom.R < 100, $"Expected a blue band at the bottom, found {bottom}.");
     }
 
     [Fact]
@@ -228,32 +239,4 @@ public class ThumbicoImageTests
         return false;
     }
 
-    private static (int Top, int Bottom) OpaquePixelsPerHalf(Bitmap bitmap)
-    {
-        int half = bitmap.Height / 2;
-        int top = 0;
-        int bottom = 0;
-
-        for (int y = 0; y < bitmap.Height; y++)
-        {
-            for (int x = 0; x < bitmap.Width; x++)
-            {
-                if (bitmap.GetPixel(x, y).A <= 128)
-                {
-                    continue;
-                }
-
-                if (y < half)
-                {
-                    top++;
-                }
-                else
-                {
-                    bottom++;
-                }
-            }
-        }
-
-        return (top, bottom);
-    }
 }
