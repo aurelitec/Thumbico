@@ -1,0 +1,8 @@
+// Shell: turns a path into a shell item that can render itself as an image.
+SHCreateItemFromParsingName
+IShellItemImageFactory
+
+// GDI: inspecting and releasing the bitmap the shell hands back.
+GetObject
+DeleteObject
+DIBSECTION

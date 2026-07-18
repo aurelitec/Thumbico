@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Thumbico.Core.Tests/Thumbico.Core.Tests.csproj" />
+  <Project Path="Thumbico.Core/Thumbico.Core.csproj" />
+</Solution>
