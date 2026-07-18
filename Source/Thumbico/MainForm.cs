@@ -18,8 +18,8 @@ internal sealed class MainForm : Form
 
     private static readonly TextureBrush Checkerboard = CreateCheckerboard();
 
-    private ThumbicoImage? thumbico;
-    private string? path;
+    private ThumbicoImage? _thumbico;
+    private string? _path;
 
     internal MainForm(string? initialPath)
     {
@@ -59,9 +59,9 @@ internal sealed class MainForm : Form
     {
         base.OnResizeEnd(e);
 
-        if (this.path is not null)
+        if (this._path is not null)
         {
-            this.Show(this.path);
+            this.Show(this._path);
         }
     }
 
@@ -69,7 +69,7 @@ internal sealed class MainForm : Form
     {
         e.Graphics.FillRectangle(Checkerboard, this.ClientRectangle);
 
-        if (this.thumbico is null)
+        if (this._thumbico is null)
         {
             TextRenderer.DrawText(
                 e.Graphics,
@@ -82,7 +82,7 @@ internal sealed class MainForm : Form
             return;
         }
 
-        Bitmap bitmap = this.thumbico.Bitmap;
+        Bitmap bitmap = this._thumbico.Bitmap;
         e.Graphics.DrawImageUnscaled(
             bitmap,
             (this.ClientSize.Width - bitmap.Width) / 2,
@@ -93,7 +93,7 @@ internal sealed class MainForm : Form
     {
         if (disposing)
         {
-            this.thumbico?.Dispose();
+            this._thumbico?.Dispose();
         }
 
         base.Dispose(disposing);
@@ -137,9 +137,9 @@ internal sealed class MainForm : Form
             return;
         }
 
-        this.thumbico?.Dispose();
-        this.thumbico = loaded;
-        this.path = itemPath;
+        this._thumbico?.Dispose();
+        this._thumbico = loaded;
+        this._path = itemPath;
 
         this.Text = $"Thumbico - {Path.GetFileName(itemPath)} - "
             + $"{loaded.Size.Width} x {loaded.Size.Height} {(loaded.IsIcon ? "icon" : "thumbnail")}";

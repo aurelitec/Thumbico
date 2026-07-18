@@ -64,7 +64,7 @@ public sealed class ThumbicoImage : IDisposable
     public void Save(string path, ThumbicoFormat format)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(path);
-        ObjectDisposedException.ThrowIf(this.disposed, this);
+        ObjectDisposedException.ThrowIf(this._disposed, this);
 
         this.Bitmap.Save(path, ToImageFormat(format));
     }
@@ -75,7 +75,7 @@ public sealed class ThumbicoImage : IDisposable
     /// <param name="transform">The rotation or flip to apply.</param>
     public void Transform(ThumbicoTransform transform)
     {
-        ObjectDisposedException.ThrowIf(this.disposed, this);
+        ObjectDisposedException.ThrowIf(this._disposed, this);
 
         this.Bitmap.RotateFlip(ToRotateFlipType(transform));
     }
@@ -83,13 +83,13 @@ public sealed class ThumbicoImage : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
-        if (this.disposed)
+        if (this._disposed)
         {
             return;
         }
 
         this.Bitmap.Dispose();
-        this.disposed = true;
+        this._disposed = true;
     }
 
     /// <summary>
@@ -120,5 +120,5 @@ public sealed class ThumbicoImage : IDisposable
         _ => throw new ArgumentOutOfRangeException(nameof(transform)),
     };
 
-    private bool disposed;
+    private bool _disposed;
 }
