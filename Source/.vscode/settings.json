@@ -1,0 +1,15 @@
+{
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "editor.tabSize": 2,
+  "editor.rulers": [
+    80,
+    100,
+    120
+  ],
+  "dotnet.defaultSolution": "Thumbico.slnx",
+  "dotnet.testWindow.useTestingPlatformProtocol": true,
+  "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "fullSolution",
+  "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "fullSolution"
+}
