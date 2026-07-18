@@ -59,6 +59,16 @@ public class ThumbicoImageTests
         }
     }
 
+    [Theory]
+    [InlineData("shell:RecycleBinFolder")]
+    [InlineData("::{20D04FE0-3AEA-1069-A2D8-08002B30309D}")]
+    public void WhenPathIsAShellNamespaceLocationThenItResolves(string path)
+    {
+        using ThumbicoImage thumbico = ThumbicoImage.FromPath(path, RequestedSize);
+
+        Assert.True(thumbico.Size.Width > 0);
+    }
+
     [Fact]
     public void WhenItemIsAFolderThenReturnsAnImage()
     {

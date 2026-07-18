@@ -81,6 +81,10 @@ internal static class ShellImage
     /// <summary>
     /// Copies a native bitmap into a managed one that owns its pixels, preserving transparency.
     /// </summary>
+    /// <remarks>
+    /// The obvious route, Image.FromHbitmap, is documented not to preserve the alpha channel, which
+    /// icons depend on. Reading the DIB section directly is the way to keep it.
+    /// </remarks>
     private static unsafe Bitmap ToManagedBitmap(DeleteObjectSafeHandle hbitmap)
     {
         DIBSECTION dib = default;
