@@ -4,6 +4,10 @@
     <ProjectReference Include="..\Thumbico.Core\Thumbico.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="Thumbico.Tests" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net10.0-windows</TargetFramework>
