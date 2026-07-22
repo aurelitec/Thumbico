@@ -16,10 +16,10 @@ namespace Thumbico;
 public static class ThumbicoSize
 {
     /// <summary>
-    /// The largest dimension accepted, which is the limit the 2018 size dialog enforced. That was a
-    /// spinner and could not be overtyped; free text can, so the same limit now needs checking.
+    /// The largest dimension accepted, which is the limit version 1.5 enforced. Its size spinners
+    /// could not be overtyped, so the limit needed no check; free text does.
     /// </summary>
-    public const int MaximumDimension = 10000;
+    public const int MaximumDimension = 5000;
 
     /// <summary>
     /// Parses a size written as a single number, meaning a square, or as two numbers separated by

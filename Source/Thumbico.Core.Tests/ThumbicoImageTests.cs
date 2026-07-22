@@ -223,6 +223,50 @@ public class ThumbicoImageTests
         thumbico.Dispose();
     }
 
+    [Fact]
+    public void WhenConvertedToGrayscaleThenEveryPixelHasEqualChannels()
+    {
+        using ThumbicoImage thumbico = ThumbicoImage.FromPath(TestFiles.PngFile, RequestedSize);
+
+        thumbico.ToGrayscale();
+
+        Color sample = thumbico.Bitmap.GetPixel(thumbico.Size.Width / 2, thumbico.Size.Height / 2);
+        Assert.Equal(sample.R, sample.G);
+        Assert.Equal(sample.G, sample.B);
+    }
+
+    [Fact]
+    public void WhenConvertedToGrayscaleThenTransparencySurvives()
+    {
+        using ThumbicoImage thumbico = ThumbicoImage.FromPath(
+            TestFiles.TextFile, RequestedSize, ThumbicoSource.IconOnly);
+
+        thumbico.ToGrayscale();
+
+        Assert.Equal(PixelFormat.Format32bppArgb, thumbico.Bitmap.PixelFormat);
+        Assert.True(HasTransparentPixel(thumbico.Bitmap), "Expected transparency to survive.");
+    }
+
+    [Fact]
+    public void WhenConvertedToGrayscaleThenTheSizeIsUnchanged()
+    {
+        using ThumbicoImage thumbico = ThumbicoImage.FromPath(TestFiles.PngFile, RequestedSize);
+        Size before = thumbico.Size;
+
+        thumbico.ToGrayscale();
+
+        Assert.Equal(before, thumbico.Size);
+    }
+
+    [Fact]
+    public void WhenDisposedThenToGrayscaleThrowsObjectDisposedException()
+    {
+        ThumbicoImage thumbico = ThumbicoImage.FromPath(TestFiles.PngFile, RequestedSize);
+        thumbico.Dispose();
+
+        Assert.Throws<ObjectDisposedException>(thumbico.ToGrayscale);
+    }
+
     private static bool HasTransparentPixel(Bitmap bitmap)
     {
         for (int y = 0; y < bitmap.Height; y++)

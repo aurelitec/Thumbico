@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the repository root for license information.
 
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
 namespace Thumbico;
@@ -80,6 +81,36 @@ public sealed class ThumbicoImage : IDisposable
         this.Bitmap.RotateFlip(ToRotateFlipType(transform));
     }
 
+    /// <summary>
+    /// Converts the image to shades of grey in place, preserving transparency.
+    /// </summary>
+    public void ToGrayscale()
+    {
+        ObjectDisposedException.ThrowIf(this._disposed, this);
+
+        Bitmap converted = new(this.Bitmap.Width, this.Bitmap.Height, PixelFormat.Format32bppArgb);
+        using (Graphics graphics = Graphics.FromImage(converted))
+        using (ImageAttributes attributes = new())
+        {
+            attributes.SetColorMatrix(GrayscaleMatrix);
+
+            // Take the result as it is, so the transparent canvas underneath cannot alter the alpha.
+            graphics.CompositingMode = CompositingMode.SourceCopy;
+            graphics.DrawImage(
+                this.Bitmap,
+                new Rectangle(Point.Empty, converted.Size),
+                0,
+                0,
+                this.Bitmap.Width,
+                this.Bitmap.Height,
+                GraphicsUnit.Pixel,
+                attributes);
+        }
+
+        this.Bitmap.Dispose();
+        this.Bitmap = converted;
+    }
+
     /// <inheritdoc/>
     public void Dispose()
     {
@@ -119,6 +150,19 @@ public sealed class ThumbicoImage : IDisposable
         ThumbicoTransform.FlipVertical => RotateFlipType.RotateNoneFlipY,
         _ => throw new ArgumentOutOfRangeException(nameof(transform)),
     };
+
+    /// <summary>
+    /// Rec. 709 luma weights, which match the sRGB primaries the shell returns. The alpha row is
+    /// left as an identity so transparency passes through untouched.
+    /// </summary>
+    private static readonly ColorMatrix GrayscaleMatrix = new(
+    [
+        [0.2126f, 0.2126f, 0.2126f, 0f, 0f],
+        [0.7152f, 0.7152f, 0.7152f, 0f, 0f],
+        [0.0722f, 0.0722f, 0.0722f, 0f, 0f],
+        [0f, 0f, 0f, 1f, 0f],
+        [0f, 0f, 0f, 0f, 1f],
+    ]);
 
     private bool _disposed;
 }

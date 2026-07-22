@@ -15,7 +15,7 @@ public class ThumbicoSizeTests
     [InlineData("57×69", 57, 69)]
     [InlineData("57 x 69", 57, 69)]
     [InlineData("1", 1, 1)]
-    [InlineData("10000", 10000, 10000)]
+    [InlineData("5000", 5000, 5000)]
     public void WhenTextIsValidThenItParses(string text, int width, int height)
     {
         Assert.True(ThumbicoSize.TryParse(text, out Size size));
@@ -33,7 +33,7 @@ public class ThumbicoSizeTests
     [InlineData("x69")]
     [InlineData("57x0")]
     [InlineData("57x69x12")]
-    [InlineData("10001")]
+    [InlineData("5001")]
     [InlineData("99999999999999999999")]
     [InlineData("1.5")]
     [InlineData("1,000")]
