@@ -47,6 +47,7 @@ internal sealed partial class MainForm : Form
     private bool _flipHorizontal;
     private bool _flipVertical;
     private bool _grayscale;
+    private bool _nakedMode;
 
     internal MainForm(string? initialPath)
     {
@@ -135,6 +136,11 @@ internal sealed partial class MainForm : Form
         {
             e.SuppressKeyPress = true;
             this.Render();
+        }
+        else if (e.KeyCode == Keys.Escape && this._nakedMode)
+        {
+            e.SuppressKeyPress = true;
+            this.SetNakedMode(naked: false);
         }
     }
 
@@ -496,8 +502,32 @@ internal sealed partial class MainForm : Form
         this._solidColorItem.Checked = true;
     }
 
-    private void OnNakedMode(object? sender, EventArgs e)
+    /// <summary>
+    /// Strips the window down to the image, keeping the title bar so it can still be moved.
+    /// </summary>
+    /// <remarks>
+    /// The 1.0 and 1.5 shape, restored: hide the toolbar, the window buttons and the scrollbars, and
+    /// leave the window exactly where it is. It never maximized and never went borderless - those
+    /// were 2018's Fullscreen and 2021's Preview Mode, neither of which shipped. A window that stays
+    /// a window can be put beside the thing you are comparing an icon against, which is the point.
+    /// </remarks>
+    private void OnNakedMode(object? sender, EventArgs e) => this.SetNakedMode(!this._nakedMode);
+
+    private void SetNakedMode(bool naked)
     {
+        this._nakedMode = naked;
+        this._nakedModeItem.Checked = naked;
+        this._toolStrip.Visible = !naked;
+        this._statusStrip.Visible = !naked;
+        this.ControlBox = !naked;
+        this._canvas.AutoScroll = !naked;
+
+        // The canvas has just grown into the space the chrome vacated, so the request has changed.
+        // Layout runs synchronously here, so the new client size is already the one to measure.
+        if (this._fixedSize is null)
+        {
+            this.Render();
+        }
     }
 
     private void OnOnlineHelp(object? sender, EventArgs e)
