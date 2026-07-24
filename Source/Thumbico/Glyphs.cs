@@ -77,8 +77,9 @@ internal static class Glyphs
         byte[] font = new byte[stream.Length];
         stream.ReadExactly(font);
 
-        // GDI+ reads this buffer for as long as any font built from it is alive, which here is the
-        // whole process, so it is allocated once and deliberately never freed.
+        // Whether GDI+ copies this buffer or keeps reading it is not documented either way, so it is
+        // allocated once and never freed. The cost of the precaution is four kilobytes for the
+        // lifetime of the process; the cost of being wrong is a font that decodes to garbage.
         IntPtr buffer = Marshal.AllocCoTaskMem(font.Length);
         Marshal.Copy(font, 0, buffer, font.Length);
 
