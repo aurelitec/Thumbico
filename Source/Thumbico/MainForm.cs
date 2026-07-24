@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See LICENSE in the repository root for license information.
 
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.Globalization;
 
 namespace Thumbico;
@@ -21,6 +22,19 @@ internal sealed partial class MainForm : Form
     /// number the shell is already ignoring would often produce no visible change at all.
     /// </summary>
     private const double SizeStep = 1.25;
+
+    /// <summary>
+    /// The save formats, in the same order as the pairs in the dialog filter. The two lists are
+    /// only correct while they agree, which is what the 2018 build got wrong.
+    /// </summary>
+    private static readonly ThumbicoFormat[] SaveFormats =
+    [
+        ThumbicoFormat.Png,
+        ThumbicoFormat.Bmp,
+        ThumbicoFormat.Gif,
+        ThumbicoFormat.Jpeg,
+        ThumbicoFormat.Tiff,
+    ];
 
     private readonly string? _initialPath;
 
@@ -346,10 +360,84 @@ internal sealed partial class MainForm : Form
 
     private void OnSaveAs(object? sender, EventArgs e)
     {
+        if (this._thumbico is null)
+        {
+            return;
+        }
+
+        using SaveFileDialog dialog = new()
+        {
+            AddExtension = true,
+            Filter = Strings.SaveDialogFilter,
+            FileName = Path.GetFileNameWithoutExtension(this._path) + "_thumbico",
+        };
+
+        if (dialog.ShowDialog(this) != DialogResult.OK)
+        {
+            return;
+        }
+
+        try
+        {
+            this._thumbico.Save(dialog.FileName, ChooseFormat(dialog.FileName, dialog.FilterIndex));
+        }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException)
+        {
+            this._returnedLabel.Text = error.Message;
+        }
     }
 
+    /// <summary>
+    /// Decides what to write, preferring the name the user typed over the filter they left selected.
+    /// </summary>
+    /// <remarks>
+    /// The dialog appends the filter's extension when none was typed, so in the ordinary case these
+    /// two agree and the filter decides. They disagree only when the name carries an extension of
+    /// its own, and then the name has to win: every other program reads the file by its extension,
+    /// so honouring the filter instead would write BMP bytes into something called .png.
+    /// </remarks>
+    private static ThumbicoFormat ChooseFormat(string fileName, int filterIndex)
+        => Path.GetExtension(fileName).ToUpperInvariant() switch
+        {
+            ".PNG" => ThumbicoFormat.Png,
+            ".BMP" => ThumbicoFormat.Bmp,
+            ".GIF" => ThumbicoFormat.Gif,
+            ".JPG" or ".JPEG" => ThumbicoFormat.Jpeg,
+            ".TIF" or ".TIFF" => ThumbicoFormat.Tiff,
+            _ => SaveFormats[filterIndex - 1],
+        };
+
+    /// <summary>
+    /// Puts the image on the clipboard twice: as PNG bytes, which keep the alpha channel, and as a
+    /// bitmap for applications that only read the legacy format.
+    /// </summary>
+    /// <remarks>
+    /// The bitmap copy is flattened onto an opaque background first. Handing a transparent bitmap
+    /// straight to SetImage does not merely lose the alpha, it corrupts the colours, because the
+    /// clipboard converts it through a screen-compatible device bitmap.
+    /// </remarks>
     private void OnCopy(object? sender, EventArgs e)
     {
+        if (this._thumbico is null)
+        {
+            return;
+        }
+
+        // SetDataObject with copy: true renders every format before it returns, so the stream can go.
+        using MemoryStream png = new();
+        this._thumbico.Bitmap.Save(png, ImageFormat.Png);
+
+        using Bitmap flattened = new(this._thumbico.Bitmap.Width, this._thumbico.Bitmap.Height);
+        using (Graphics graphics = Graphics.FromImage(flattened))
+        {
+            graphics.Clear(this._canvas.SolidBackground ?? Color.White);
+            graphics.DrawImageUnscaled(this._thumbico.Bitmap, 0, 0);
+        }
+
+        DataObject data = new();
+        data.SetData("PNG", png);
+        data.SetImage(flattened);
+        Clipboard.SetDataObject(data, copy: true);
     }
 
     private void OnSourceSelected(object? sender, EventArgs e)
