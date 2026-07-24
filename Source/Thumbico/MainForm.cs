@@ -36,6 +36,8 @@ internal sealed partial class MainForm : Form
         ThumbicoFormat.Tiff,
     ];
 
+    private readonly SettingsStore _store = SettingsStore.CreateDefault();
+    private readonly AppSettings _settings;
     private readonly string? _initialPath;
 
     private ThumbicoImage? _thumbico;
@@ -52,7 +54,11 @@ internal sealed partial class MainForm : Form
     internal MainForm(string? initialPath)
     {
         this.BuildLayout();
-        this._sizeBox.SelectedIndex = 0;
+
+        // ApplySettings sets the size combo itself, so the default selection is not set separately;
+        // doing both would ask the shell twice on startup.
+        this._settings = this._store.Load();
+        this.ApplySettings();
         this._initialPath = initialPath;
     }
 
@@ -78,13 +84,17 @@ internal sealed partial class MainForm : Form
     {
         base.OnLoad(e);
 
-        Rectangle working = Screen.FromControl(this).WorkingArea;
-        this.Size = new Size(
-            Math.Min(this.Width, working.Width),
-            Math.Min(this.Height, working.Height));
-        this.Location = new Point(
-            Math.Clamp(this.Left, working.Left, working.Right - this.Width),
-            Math.Clamp(this.Top, working.Top, working.Bottom - this.Height));
+        // Only when the window is a normal window: assigning Size to a maximized form restores it.
+        if (this.WindowState == FormWindowState.Normal)
+        {
+            Rectangle working = Screen.FromControl(this).WorkingArea;
+            this.Size = new Size(
+                Math.Min(this.Width, working.Width),
+                Math.Min(this.Height, working.Height));
+            this.Location = new Point(
+                Math.Clamp(this.Left, working.Left, working.Right - this.Width),
+                Math.Clamp(this.Top, working.Top, working.Bottom - this.Height));
+        }
 
         if (!string.IsNullOrWhiteSpace(this._initialPath))
         {
@@ -231,6 +241,64 @@ internal sealed partial class MainForm : Form
         this._thumbico?.Dispose();
         this._thumbico = null;
         this._saveItem.Enabled = this._copyItem.Enabled = false;
+    }
+
+    /// <summary>
+    /// Restores what the user chose last time. The window bounds are only honoured when they still
+    /// land on a connected screen, so a monitor that has gone away cannot hide the window.
+    /// </summary>
+    private void ApplySettings()
+    {
+        if (!this._settings.WindowBounds.IsEmpty
+            && Screen.AllScreens.Any(screen => screen.WorkingArea.IntersectsWith(this._settings.WindowBounds)))
+        {
+            this.StartPosition = FormStartPosition.Manual;
+            this.Bounds = this._settings.WindowBounds;
+        }
+
+        if (this._settings.WindowMaximized)
+        {
+            this.WindowState = FormWindowState.Maximized;
+        }
+
+        // Color.Empty is what the converter yields for text it cannot read, and an empty colour is
+        // not a colour the user ever chose, so it falls back to the checkerboard like a missing one.
+        if (this._settings.BackgroundColor is Color background && background != Color.Empty)
+        {
+            this._canvas.SolidBackground = background;
+            this._checkerboardItem.Checked = false;
+            this._solidColorItem.Checked = true;
+        }
+
+        this._sizeBox.Text = string.IsNullOrWhiteSpace(this._settings.SizeSelection)
+            ? Strings.FitToWindow
+            : this._settings.SizeSelection;
+        this.CommitSizeText();
+
+        this._source = this._settings.Source;
+        foreach (ToolStripMenuItem item in this._sourceItems)
+        {
+            item.Checked = (ThumbicoSource)item.Tag! == this._source;
+        }
+
+        this._options = this._settings.Options;
+        foreach ((ToolStripMenuItem item, ThumbicoOptions flag) in this._optionItems)
+        {
+            item.Checked = this._options.HasFlag(flag);
+        }
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        this._settings.WindowMaximized = this.WindowState == FormWindowState.Maximized;
+        this._settings.WindowBounds = this.WindowState == FormWindowState.Normal ? this.Bounds : this.RestoreBounds;
+        this._settings.BackgroundColor = this._canvas.SolidBackground;
+        this._settings.SizeSelection = this._sizeBox.Text;
+        this._settings.Source = this._source;
+        this._settings.Options = this._options;
+        this._store.Save(this._settings);
+
+        base.OnFormClosing(e);
     }
 
     private void SetPath(string path)
