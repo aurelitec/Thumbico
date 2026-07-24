@@ -14,10 +14,19 @@ internal sealed partial class MainForm : Form
     /// <summary>The smallest size worth asking the shell for, used when the canvas is tiny.</summary>
     private const int MinimumRequest = 16;
 
+    /// <summary>
+    /// What Make Bigger multiplies the request by, and Make Smaller divides it by. A factor rather
+    /// than the flat 20 pixels of 1.0 and 1.5, because those versions overwrote the size box with
+    /// the size the shell returned; here the box holds the request, so a fixed step applied to a
+    /// number the shell is already ignoring would often produce no visible change at all.
+    /// </summary>
+    private const double SizeStep = 1.25;
+
     private readonly string? _initialPath;
 
     private ThumbicoImage? _thumbico;
     private string? _path;
+    private Size? _fixedSize;
     private ThumbicoSource _source = ThumbicoSource.Auto;
     private ThumbicoOptions _options = ThumbicoOptions.None;
     private int _quarterTurns;
@@ -33,9 +42,9 @@ internal sealed partial class MainForm : Form
     }
 
     /// <summary>
-    /// The requested size. Always the canvas until Task 9 gives the combo a way to fix it.
+    /// The requested size: whatever the user chose, or the canvas itself in Fit to window mode.
     /// </summary>
-    private Size RequestedSize => new(
+    private Size RequestedSize => this._fixedSize ?? new Size(
         Math.Max(this._canvas.ClientSize.Width, MinimumRequest),
         Math.Max(this._canvas.ClientSize.Height, MinimumRequest));
 
@@ -88,14 +97,16 @@ internal sealed partial class MainForm : Form
     }
 
     /// <summary>
-    /// Re-asks the shell once resizing has finished. Task 9 makes this conditional on the size
-    /// still following the window.
+    /// Re-asks the shell once resizing has finished, but only when the size follows the window.
     /// </summary>
     protected override void OnResizeEnd(EventArgs e)
     {
         base.OnResizeEnd(e);
 
-        this.Render();
+        if (this._fixedSize is null)
+        {
+            this.Render();
+        }
     }
 
     /// <summary>
@@ -240,20 +251,62 @@ internal sealed partial class MainForm : Form
         }
     }
 
-    private void OnSizeBoxCommitted(object? sender, EventArgs e)
-    {
-    }
+    private void OnSizeBoxCommitted(object? sender, EventArgs e) => this.CommitSizeText();
 
     private void OnSizeBoxKeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.KeyCode == Keys.Enter)
+        {
+            e.SuppressKeyPress = true;
+            this.CommitSizeText();
+        }
     }
 
-    private void OnMakeBigger(object? sender, EventArgs e)
+    /// <summary>
+    /// Reads the combo. Unparseable text falls back to the last good value rather than raising an
+    /// error, because this is a live control and not a submitted form.
+    /// </summary>
+    private void CommitSizeText()
     {
+        string text = this._sizeBox.Text.Trim();
+
+        if (string.Equals(text, Strings.FitToWindow, StringComparison.CurrentCultureIgnoreCase))
+        {
+            this._fixedSize = null;
+            this.Render();
+
+            return;
+        }
+
+        if (ThumbicoSize.TryParse(text, out Size parsed))
+        {
+            this._fixedSize = parsed;
+            this.Render();
+
+            return;
+        }
+
+        this._sizeBox.Text = this._fixedSize is Size current
+            ? ThumbicoSize.Format(current)
+            : Strings.FitToWindow;
     }
 
-    private void OnMakeSmaller(object? sender, EventArgs e)
+    private void OnMakeBigger(object? sender, EventArgs e) => this.StepSize(SizeStep);
+
+    private void OnMakeSmaller(object? sender, EventArgs e) => this.StepSize(1 / SizeStep);
+
+    /// <summary>
+    /// Scales the requested size, converting Fit to window into a fixed size on the first step.
+    /// </summary>
+    private void StepSize(double factor)
     {
+        Size current = this._fixedSize ?? this.RequestedSize;
+        int width = Math.Clamp((int)Math.Round(current.Width * factor), 1, ThumbicoSize.MaximumDimension);
+        int height = Math.Clamp((int)Math.Round(current.Height * factor), 1, ThumbicoSize.MaximumDimension);
+
+        this._fixedSize = new Size(width, height);
+        this._sizeBox.Text = ThumbicoSize.Format(this._fixedSize.Value);
+        this.Render();
     }
 
     private void OnRotate(object? sender, EventArgs e)
