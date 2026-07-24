@@ -44,13 +44,14 @@ internal sealed partial class MainForm
     private int IconSize => 16 * this.DeviceDpi / 96;
 
     /// <summary>
-    /// Releases what the control tree's own disposal does not reach. Task 8 adds the current
-    /// thumbico here once there is one to release.
+    /// Releases what the control tree's own disposal does not reach: the current image, which the
+    /// canvas borrows rather than owns, and the menu, which belongs to no control's collection.
     /// </summary>
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
+            this._thumbico?.Dispose();
             this._menu?.Dispose();
         }
 
@@ -74,7 +75,6 @@ internal sealed partial class MainForm
         this.BuildStatusStrip();
 
         this._canvas = new ThumbicoCanvas { Dock = DockStyle.Fill, TabIndex = 1 };
-        this._canvas.MouseUp += this.OnCanvasMouseUp;
 
         // Fill first, then the strips, so docking resolves the canvas last and it takes what is left.
         this.Controls.Add(this._canvas);
@@ -82,6 +82,14 @@ internal sealed partial class MainForm
         this.Controls.Add(this._statusStrip);
 
         this.BuildMenu();
+
+        // Assigning the menu to the form is what makes its shortcuts work at all. Windows Forms
+        // routes a command key through the focused control's ProcessCmdKey and up its parents, and
+        // each one offers the key to its own ContextMenuStrip; a menu that is only ever Show()n is
+        // in nobody's chain, so every accelerator on it is dead. Putting it on the form rather than
+        // the canvas means the key is caught wherever focus happens to be, and right-clicking gets
+        // handled natively, including the Menu key and Shift+F10.
+        this.ContextMenuStrip = this._menu;
 
         this.ResumeLayout(performLayout: true);
     }
@@ -122,8 +130,12 @@ internal sealed partial class MainForm
         ]);
 
         this._grayscaleItem = this.BuildItem(Strings.MenuGrayscale, Glyphs.Grayscale, Keys.None, this.OnGrayscale);
+
+        // Both act on a rendered image, so they stay unavailable until there is one.
         this._saveItem = this.BuildItem(Strings.MenuSaveImageAs, Glyphs.SaveAs, Keys.Control | Keys.S, this.OnSaveAs);
+        this._saveItem.Enabled = false;
         this._copyItem = this.BuildItem(Strings.MenuCopy, Glyphs.Copy, Keys.Control | Keys.C, this.OnCopy);
+        this._copyItem.Enabled = false;
 
         ToolStripMenuItem source = this.BuildItem(Strings.MenuSource, Glyphs.Source);
         this._sourceItems =
