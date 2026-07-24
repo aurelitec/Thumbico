@@ -1,2 +1,8 @@
 # Set default behavior to automatically normalize text files and enforce LF
 * text=auto eol=lf
+
+# Never let auto-detection guess at a binary asset. A font that gets line-ending
+# normalized is corrupt and fails at runtime rather than at build time.
+*.ttf binary
+*.ico binary
+*.png binary

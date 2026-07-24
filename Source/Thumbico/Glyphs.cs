@@ -1,0 +1,90 @@
+// Copyright (c) 2011-2026 Aurelitec <https://www.aurelitec.com>
+// Licensed under the MIT License. See LICENSE in the repository root for license information.
+
+using System.Drawing.Text;
+using System.Runtime.InteropServices;
+
+namespace Thumbico;
+
+/// <summary>
+/// The bundled icon font and the code points the interface draws from it.
+/// </summary>
+/// <remarks>
+/// A subset of Microsoft's Fluent UI System Icons, embedded rather than looked up by family name so
+/// that there is no font for a machine to be missing. Each constant records the upstream icon name,
+/// which is what regenerating the subset needs; see THIRD-PARTY-NOTICES.md.
+/// </remarks>
+internal static class Glyphs
+{
+    internal const string Open = "\uE90B";           // folder_open
+    internal const string Refresh = "\uE0BF";        // arrow_clockwise
+    internal const string More = "\uEC72";           // more_horizontal
+    internal const string SaveAs = "\uEFA1";         // save_image
+    internal const string Copy = "\uE5D7";           // copy
+    internal const string RotateFlip = "\uE143";     // arrow_rotate_clockwise
+    internal const string RotateLeft = "\uEF85";     // rotate_left
+    internal const string RotateRight = "\uEF87";    // rotate_right
+    internal const string FlipHorizontal = "\uE8D9"; // flip_horizontal
+    internal const string FlipVertical = "\uE8DB";   // flip_vertical
+    internal const string Grayscale = "\uE49A";      // circle_half_fill
+    internal const string NakedMode = "\uE951";      // full_screen_maximize
+    internal const string ZoomIn = "\uF60F";         // zoom_in
+    internal const string ZoomOut = "\uF611";        // zoom_out
+    internal const string Source = "\uEA52";         // image
+    internal const string Background = "\uE566";     // color
+    internal const string Help = "\uEF07";           // question_circle
+    internal const string About = "\uEA88";          // info
+
+    private const string ResourceName = "Thumbico.Assets.Thumbico.Icons.ttf";
+
+    private static readonly PrivateFontCollection Collection = LoadFont();
+
+    /// <summary>
+    /// Draws one glyph into a square bitmap over a transparent background.
+    /// </summary>
+    /// <param name="glyph">One of the code point constants on this class.</param>
+    /// <param name="size">The edge length in pixels. The caller derives this from the display scale
+    /// rather than assuming 16.</param>
+    /// <param name="color">The ink colour. The caller takes this from the surface the bitmap will
+    /// sit on, so the icon follows the light or dark theme.</param>
+    /// <returns>A new bitmap that the caller owns.</returns>
+    internal static Bitmap Render(string glyph, int size, Color color)
+    {
+        Bitmap bitmap = new(size, size);
+
+        using (Graphics graphics = Graphics.FromImage(bitmap))
+        using (Font font = new(Collection.Families[0], size, GraphicsUnit.Pixel))
+        using (SolidBrush brush = new(color))
+        using (StringFormat format = new()
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center,
+        })
+        {
+            // DrawString is the GDI+ path, which is the one documented to see a memory font.
+            graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
+            graphics.DrawString(glyph, font, brush, new RectangleF(0, 0, size, size), format);
+        }
+
+        return bitmap;
+    }
+
+    private static PrivateFontCollection LoadFont()
+    {
+        using Stream stream = typeof(Glyphs).Assembly.GetManifestResourceStream(ResourceName)
+            ?? throw new InvalidOperationException($"The embedded icon font {ResourceName} is missing.");
+
+        byte[] font = new byte[stream.Length];
+        stream.ReadExactly(font);
+
+        // GDI+ reads this buffer for as long as any font built from it is alive, which here is the
+        // whole process, so it is allocated once and deliberately never freed.
+        IntPtr buffer = Marshal.AllocCoTaskMem(font.Length);
+        Marshal.Copy(font, 0, buffer, font.Length);
+
+        PrivateFontCollection collection = new();
+        collection.AddMemoryFont(buffer, font.Length);
+
+        return collection;
+    }
+}

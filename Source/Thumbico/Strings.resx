@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AppName" xml:space="preserve">
+    <value>Thumbico</value>
+  </data>
+  <data name="DropPrompt" xml:space="preserve">
+    <value>Drop a file, folder, or drive onto this window.</value>
+  </data>
+  <data name="OpenButtonTooltip" xml:space="preserve">
+    <value>Open a file, folder, or drive</value>
+  </data>
+  <data name="RefreshButtonTooltip" xml:space="preserve">
+    <value>Ask the shell again</value>
+  </data>
+  <data name="MenuButtonTooltip" xml:space="preserve">
+    <value>More</value>
+  </data>
+  <data name="PathBoxAccessibleName" xml:space="preserve">
+    <value>Path of the item to render</value>
+  </data>
+  <data name="SizeBoxAccessibleName" xml:space="preserve">
+    <value>Requested size</value>
+  </data>
+  <data name="FitToWindow" xml:space="preserve">
+    <value>Fit to window</value>
+  </data>
+  <data name="StatusAskedFormat" xml:space="preserve">
+    <value>Asked for {0}</value>
+  </data>
+  <data name="StatusReturnedFormat" xml:space="preserve">
+    <value>Returned {0}</value>
+  </data>
+  <data name="StatusKindIcon" xml:space="preserve">
+    <value>Icon</value>
+  </data>
+  <data name="StatusKindThumbnail" xml:space="preserve">
+    <value>Thumbnail</value>
+  </data>
+  <data name="MenuOpen" xml:space="preserve">
+    <value>&amp;Open...</value>
+  </data>
+  <data name="MenuMakeBigger" xml:space="preserve">
+    <value>Make &amp;Bigger</value>
+  </data>
+  <data name="MenuMakeSmaller" xml:space="preserve">
+    <value>Make &amp;Smaller</value>
+  </data>
+  <data name="MenuRotateFlip" xml:space="preserve">
+    <value>&amp;Rotate / Flip</value>
+  </data>
+  <data name="MenuRotateLeft" xml:space="preserve">
+    <value>Rotate &amp;Left</value>
+  </data>
+  <data name="MenuRotateRight" xml:space="preserve">
+    <value>Rotate &amp;Right</value>
+  </data>
+  <data name="MenuFlipHorizontal" xml:space="preserve">
+    <value>Flip &amp;Horizontal</value>
+  </data>
+  <data name="MenuFlipVertical" xml:space="preserve">
+    <value>Flip &amp;Vertical</value>
+  </data>
+  <data name="MenuGrayscale" xml:space="preserve">
+    <value>&amp;Grayscale</value>
+  </data>
+  <data name="MenuSaveImageAs" xml:space="preserve">
+    <value>Save Image &amp;As...</value>
+  </data>
+  <data name="MenuCopy" xml:space="preserve">
+    <value>&amp;Copy</value>
+  </data>
+  <data name="MenuSource" xml:space="preserve">
+    <value>So&amp;urce</value>
+  </data>
+  <data name="MenuSourceAuto" xml:space="preserve">
+    <value>Auto</value>
+  </data>
+  <data name="MenuSourceThumbnailOnly" xml:space="preserve">
+    <value>Thumbnail only</value>
+  </data>
+  <data name="MenuSourceIconOnly" xml:space="preserve">
+    <value>Icon only</value>
+  </data>
+  <data name="MenuAdvanced" xml:space="preserve">
+    <value>Ad&amp;vanced</value>
+  </data>
+  <data name="MenuOptionAllowLargerSize" xml:space="preserve">
+    <value>Allow larger size</value>
+  </data>
+  <data name="MenuOptionCropToSquare" xml:space="preserve">
+    <value>Crop to square</value>
+  </data>
+  <data name="MenuOptionWideAspect" xml:space="preserve">
+    <value>Wide aspect</value>
+  </data>
+  <data name="MenuOptionIconBackground" xml:space="preserve">
+    <value>Icon background</value>
+  </data>
+  <data name="MenuOptionScaleUp" xml:space="preserve">
+    <value>Scale up</value>
+  </data>
+  <data name="MenuBackground" xml:space="preserve">
+    <value>Bac&amp;kground</value>
+  </data>
+  <data name="MenuBackgroundCheckerboard" xml:space="preserve">
+    <value>Checkerboard</value>
+  </data>
+  <data name="MenuBackgroundSolidColor" xml:space="preserve">
+    <value>Solid Color...</value>
+  </data>
+  <data name="MenuNakedMode" xml:space="preserve">
+    <value>&amp;Naked Mode</value>
+  </data>
+  <data name="MenuOnlineHelp" xml:space="preserve">
+    <value>Online &amp;Help</value>
+  </data>
+  <data name="MenuAbout" xml:space="preserve">
+    <value>&amp;About Thumbico</value>
+  </data>
+  <data name="OpenDialogFilter" xml:space="preserve">
+    <value>All files (*.*)|*.*</value>
+  </data>
+  <data name="SaveDialogFilter" xml:space="preserve">
+    <value>PNG image (*.png)|*.png|BMP image (*.bmp)|*.bmp|GIF image (*.gif)|*.gif|JPEG image (*.jpg)|*.jpg|TIFF image (*.tif)|*.tif</value>
+  </data>
+  <data name="AboutFormat" xml:space="preserve">
+    <value>Thumbico {0}&#10;Copyright (c) 2011-{1} Aurelitec&#10;https://www.aurelitec.com</value>
+  </data>
+  <data name="UrlHelp" xml:space="preserve">
+    <value>https://www.aurelitec.com/thumbico/windows/help/</value>
+  </data>
+</root>
