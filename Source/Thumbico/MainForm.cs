@@ -48,12 +48,21 @@ internal sealed partial class MainForm : Form
     {
     }
 
+    /// <summary>
+    /// Drops the menu below the toolbar button. The offset is relative to the strip, which is what
+    /// the button's own bounds are measured against.
+    /// </summary>
     private void OnMenuButtonClicked(object? sender, EventArgs e)
-    {
-    }
+        => this._menu.Show(
+            this._toolStrip,
+            new Point(this._menuButton.Bounds.Left, this._menuButton.Bounds.Bottom));
 
     private void OnCanvasMouseUp(object? sender, MouseEventArgs e)
     {
+        if (e.Button == MouseButtons.Right)
+        {
+            this._menu.Show(this._canvas, e.Location);
+        }
     }
 
     private void OnPathBoxKeyDown(object? sender, KeyEventArgs e)
@@ -65,6 +74,62 @@ internal sealed partial class MainForm : Form
     }
 
     private void OnSizeBoxKeyDown(object? sender, KeyEventArgs e)
+    {
+    }
+
+    private void OnMakeBigger(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnMakeSmaller(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnRotate(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnFlip(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnGrayscale(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnSaveAs(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnCopy(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnSourceSelected(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnOptionToggled(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnCheckerboardSelected(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnSolidColorSelected(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnNakedMode(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnOnlineHelp(object? sender, EventArgs e)
+    {
+    }
+
+    private void OnAbout(object? sender, EventArgs e)
     {
     }
 }

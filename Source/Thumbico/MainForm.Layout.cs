@@ -27,6 +27,15 @@ internal sealed partial class MainForm
     private ToolStripStatusLabel _returnedLabel = null!;
     private ToolStripStatusLabel _kindLabel = null!;
     private ContextMenuStrip _menu = null!;
+    private ToolStripMenuItem _saveItem = null!;
+    private ToolStripMenuItem _copyItem = null!;
+    private ToolStripMenuItem _grayscaleItem = null!;
+    private ToolStripMenuItem _rotateFlipItem = null!;
+    private ToolStripMenuItem _checkerboardItem = null!;
+    private ToolStripMenuItem _solidColorItem = null!;
+    private ToolStripMenuItem _nakedModeItem = null!;
+    private ToolStripMenuItem[] _sourceItems = null!;
+    private (ToolStripMenuItem Item, ThumbicoOptions Flag)[] _optionItems = null!;
 
     /// <summary>
     /// The pixel size icons are drawn at, taken from the display scale rather than assumed. A
@@ -78,11 +87,147 @@ internal sealed partial class MainForm
     }
 
     /// <summary>
-    /// Placeholder until Task 7 builds the real menu.
+    /// Builds the single menu that the toolbar button and the canvas right-click both show.
     /// </summary>
+    /// <remarks>
+    /// One instance rather than two, because Thumbico has one object and every command acts on it,
+    /// so a context menu scoped to what was clicked would hold the same items anyway.
+    /// </remarks>
     private void BuildMenu()
     {
-        this._menu = new ContextMenuStrip();
+        ToolStripMenuItem open = this.BuildItem(
+            Strings.MenuOpen, Glyphs.Open, Keys.Control | Keys.O, this.OnOpenClicked);
+        // Windows Forms labels a shortcut from the Keys enum, which spells these two "Ctrl+Oemplus"
+        // and "Ctrl+OemMinus". The display string is what the user reads; the key still binds.
+        ToolStripMenuItem bigger = this.BuildItem(
+            Strings.MenuMakeBigger, Glyphs.ZoomIn, Keys.Control | Keys.Oemplus, this.OnMakeBigger);
+        bigger.ShortcutKeyDisplayString = Strings.ShortcutMakeBigger;
+
+        ToolStripMenuItem smaller = this.BuildItem(
+            Strings.MenuMakeSmaller, Glyphs.ZoomOut, Keys.Control | Keys.OemMinus, this.OnMakeSmaller);
+        smaller.ShortcutKeyDisplayString = Strings.ShortcutMakeSmaller;
+
+        this._rotateFlipItem = this.BuildItem(Strings.MenuRotateFlip, Glyphs.RotateFlip);
+        this._rotateFlipItem.DropDownItems.AddRange(
+        [
+            this.BuildTaggedItem(Strings.MenuRotateLeft, Glyphs.RotateLeft, Keys.Alt | Keys.L,
+                ThumbicoTransform.RotateLeft, this.OnRotate),
+            this.BuildTaggedItem(Strings.MenuRotateRight, Glyphs.RotateRight, Keys.Alt | Keys.R,
+                ThumbicoTransform.RotateRight, this.OnRotate),
+            new ToolStripSeparator(),
+            this.BuildTaggedItem(Strings.MenuFlipHorizontal, Glyphs.FlipHorizontal, Keys.Alt | Keys.H,
+                ThumbicoTransform.FlipHorizontal, this.OnFlip),
+            this.BuildTaggedItem(Strings.MenuFlipVertical, Glyphs.FlipVertical, Keys.Alt | Keys.V,
+                ThumbicoTransform.FlipVertical, this.OnFlip),
+        ]);
+
+        this._grayscaleItem = this.BuildItem(Strings.MenuGrayscale, Glyphs.Grayscale, Keys.None, this.OnGrayscale);
+        this._saveItem = this.BuildItem(Strings.MenuSaveImageAs, Glyphs.SaveAs, Keys.Control | Keys.S, this.OnSaveAs);
+        this._copyItem = this.BuildItem(Strings.MenuCopy, Glyphs.Copy, Keys.Control | Keys.C, this.OnCopy);
+
+        ToolStripMenuItem source = this.BuildItem(Strings.MenuSource, Glyphs.Source);
+        this._sourceItems =
+        [
+            this.BuildTaggedItem(Strings.MenuSourceAuto, glyph: null, Keys.None,
+                ThumbicoSource.Auto, this.OnSourceSelected),
+            this.BuildTaggedItem(Strings.MenuSourceThumbnailOnly, glyph: null, Keys.None,
+                ThumbicoSource.ThumbnailOnly, this.OnSourceSelected),
+            this.BuildTaggedItem(Strings.MenuSourceIconOnly, glyph: null, Keys.None,
+                ThumbicoSource.IconOnly, this.OnSourceSelected),
+        ];
+        source.DropDownItems.AddRange(this._sourceItems);
+
+        ToolStripMenuItem advanced = this.BuildItem(Strings.MenuAdvanced, glyph: null);
+        this._optionItems =
+        [
+            (this.BuildTaggedItem(Strings.MenuOptionAllowLargerSize, null, Keys.None,
+                ThumbicoOptions.AllowLargerSize, this.OnOptionToggled), ThumbicoOptions.AllowLargerSize),
+            (this.BuildTaggedItem(Strings.MenuOptionCropToSquare, null, Keys.None,
+                ThumbicoOptions.CropToSquare, this.OnOptionToggled), ThumbicoOptions.CropToSquare),
+            (this.BuildTaggedItem(Strings.MenuOptionWideAspect, null, Keys.None,
+                ThumbicoOptions.WideAspect, this.OnOptionToggled), ThumbicoOptions.WideAspect),
+            (this.BuildTaggedItem(Strings.MenuOptionIconBackground, null, Keys.None,
+                ThumbicoOptions.IconBackground, this.OnOptionToggled), ThumbicoOptions.IconBackground),
+            (this.BuildTaggedItem(Strings.MenuOptionScaleUp, null, Keys.None,
+                ThumbicoOptions.ScaleUp, this.OnOptionToggled), ThumbicoOptions.ScaleUp),
+        ];
+        foreach ((ToolStripMenuItem item, ThumbicoOptions _) in this._optionItems)
+        {
+            item.CheckOnClick = true;
+            advanced.DropDownItems.Add(item);
+        }
+
+        ToolStripMenuItem background = this.BuildItem(Strings.MenuBackground, Glyphs.Background);
+        this._checkerboardItem = this.BuildItem(
+            Strings.MenuBackgroundCheckerboard, null, Keys.None, this.OnCheckerboardSelected);
+        this._checkerboardItem.Checked = true;
+        this._solidColorItem = this.BuildItem(
+            Strings.MenuBackgroundSolidColor, null, Keys.None, this.OnSolidColorSelected);
+        background.DropDownItems.AddRange([this._checkerboardItem, this._solidColorItem]);
+
+        this._nakedModeItem = this.BuildItem(
+            Strings.MenuNakedMode, Glyphs.NakedMode, Keys.Control | Keys.N, this.OnNakedMode);
+
+        this._menu = new ContextMenuStrip
+        {
+            // Same reason as the ToolStrip: the glyphs are rendered at the display's pixel size, and
+            // the 16 by 16 default would resample them back down.
+            ImageScalingSize = new Size(this.IconSize, this.IconSize),
+        };
+        this._menu.Items.AddRange(
+        [
+            open,
+            new ToolStripSeparator(),
+            bigger,
+            smaller,
+            new ToolStripSeparator(),
+            this._rotateFlipItem,
+            this._grayscaleItem,
+            new ToolStripSeparator(),
+            this._saveItem,
+            this._copyItem,
+            new ToolStripSeparator(),
+            source,
+            advanced,
+            new ToolStripSeparator(),
+            background,
+            this._nakedModeItem,
+            new ToolStripSeparator(),
+            this.BuildItem(Strings.MenuOnlineHelp, Glyphs.Help, Keys.None, this.OnOnlineHelp),
+            this.BuildItem(Strings.MenuAbout, Glyphs.About, Keys.None, this.OnAbout),
+        ]);
+
+        this._sourceItems[0].Checked = true;
+    }
+
+    private ToolStripMenuItem BuildItem(string text, string? glyph)
+        => this.BuildItem(text, glyph, Keys.None, null);
+
+    private ToolStripMenuItem BuildItem(string text, string? glyph, Keys shortcut, EventHandler? onClick)
+    {
+        ToolStripMenuItem item = new(text) { ShortcutKeys = shortcut };
+
+        if (glyph is not null)
+        {
+            // MenuText rather than ControlText: the menu surface is not the toolbar surface.
+            item.Image = Glyphs.Render(glyph, this.IconSize, SystemColors.MenuText);
+        }
+
+        if (onClick is not null)
+        {
+            item.Click += onClick;
+        }
+
+        return item;
+    }
+
+    private ToolStripMenuItem BuildTaggedItem(
+        string text, string? glyph, Keys shortcut, object tag, EventHandler onClick)
+    {
+        ToolStripMenuItem item = this.BuildItem(text, glyph, shortcut, onClick);
+        item.Tag = tag;
+
+        return item;
     }
 
     private void BuildToolStrip()

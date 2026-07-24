@@ -170,4 +170,10 @@
   <data name="UrlHelp" xml:space="preserve">
     <value>https://www.aurelitec.com/thumbico/windows/help/</value>
   </data>
+  <data name="ShortcutMakeBigger" xml:space="preserve">
+    <value>Ctrl++</value>
+  </data>
+  <data name="ShortcutMakeSmaller" xml:space="preserve">
+    <value>Ctrl+-</value>
+  </data>
 </root>
