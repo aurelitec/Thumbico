@@ -6,21 +6,14 @@ using System.Globalization;
 namespace Thumbico.Tests;
 
 /// <summary>
-/// Guards the resource generation, which fails by producing nothing rather than by failing the
-/// build. Two earlier wirings, the Visual Studio designer generator and GenerateSource, both left
-/// the build green and the accessor absent.
+/// Covers the few strings whose internal structure the code depends on. The rest are plain constants
+/// and the compiler already checks every use of them.
 /// </summary>
 public class StringsTests
 {
-    [Fact]
-    public void WhenAStringIsAskedForThenTheGeneratedAccessorReturnsIt()
-    {
-        Assert.Equal("Thumbico", Strings.AppName);
-    }
-
     /// <summary>
-    /// Pins the resx line-break escaping. A resx has no backslash escapes, so a literal \n in the
-    /// value would print as a backslash and an n and collapse this to one line.
+    /// The About box is laid out by its line breaks, so writing this as a verbatim string would
+    /// collapse it to one line and print the escapes instead.
     /// </summary>
     [Fact]
     public void WhenTheAboutTextIsFormattedThenItHasThreeLines()
@@ -28,12 +21,12 @@ public class StringsTests
         string about = string.Format(CultureInfo.InvariantCulture, Strings.AboutFormat, "1.0", 2026);
 
         Assert.Equal(3, about.Split('\n').Length);
-        Assert.DoesNotContain(@"\n", about, StringComparison.Ordinal);
     }
 
     /// <summary>
-    /// The dialog filters are pipe separated, and a miscount silently produces a broken dialog
-    /// rather than an error.
+    /// The filters are pipe separated, and a miscount silently produces a broken dialog rather than
+    /// an error. The save filter's five pairs also have to stay in step with the format list that the
+    /// save handler indexes by filter position.
     /// </summary>
     [Fact]
     public void WhenTheSaveFilterIsReadThenItHasFivePairs()

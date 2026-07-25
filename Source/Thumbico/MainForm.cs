@@ -619,7 +619,7 @@ internal sealed partial class MainForm : Form
     }
 
     private void OnOnlineHelp(object? sender, EventArgs e)
-        => Process.Start(new ProcessStartInfo(Strings.UrlHelp) { UseShellExecute = true });
+        => Process.Start(new ProcessStartInfo(Urls.Help) { UseShellExecute = true });
 
     private void OnAbout(object? sender, EventArgs e)
         => MessageBox.Show(
