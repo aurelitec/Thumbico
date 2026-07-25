@@ -18,6 +18,14 @@ internal sealed partial class MainForm
     /// </summary>
     private const int ToolbarButtonPadding = 5;
 
+    /// <summary>The gap between neighbouring toolbar items, at 100 percent display scale.</summary>
+    /// <remarks>
+    /// Worth setting because the framework leaves next to nothing: a button's default margin is zero
+    /// horizontally and a hosted text box or combo gets two raw pixels, so at any scale above 100 the
+    /// items sit flush and the path box and the combo read as one joined box.
+    /// </remarks>
+    private const int ToolbarItemSpacing = 4;
+
     private static readonly string[] StandardSizes =
         ["16", "32", "48", "64", "128", "256", "512", "1024"];
 
@@ -323,6 +331,8 @@ internal sealed partial class MainForm
         this._toolStrip.Items.AddRange(
             [this._openButton, this._pathBox, this._sizeBox, this._refreshButton, this._menuButton]);
 
+        this.SpaceToolStripItems();
+
         // ToolStrip has no notion of a stretching item, so the path box is sized by hand.
         this._toolStrip.SizeChanged += (_, _) => this.StretchPathBox();
     }
@@ -335,6 +345,25 @@ internal sealed partial class MainForm
 
         this._statusStrip = new StatusStrip { SizingGrip = true };
         this._statusStrip.Items.AddRange([this._askedLabel, this._returnedLabel, this._kindLabel]);
+    }
+
+    /// <summary>Separates the toolbar items, which the framework's own margins barely do.</summary>
+    /// <remarks>
+    /// The gap goes on the right of each item only, so two neighbours are one spacing apart rather
+    /// than two, and the strip's own padding still owns the outer edges. Each item keeps whatever
+    /// vertical margin its type chose, since that is what positions it in the row, and the last item
+    /// keeps no gap because there is nothing after it to be separated from. Scaled by hand: autoscale
+    /// reaches a ToolStrip's padding but not a ToolStripItem's, which is not a control.
+    /// </remarks>
+    private void SpaceToolStripItems()
+    {
+        int spacing = ToolbarItemSpacing * this.DeviceDpi / 96;
+
+        foreach (ToolStripItem item in this._toolStrip.Items)
+        {
+            bool last = item == this._toolStrip.Items[^1];
+            item.Margin = new Padding(0, item.Margin.Top, last ? 0 : spacing, item.Margin.Bottom);
+        }
     }
 
     private void StretchPathBox()
