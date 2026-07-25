@@ -62,8 +62,15 @@ internal sealed partial class MainForm
     {
         this.SuspendLayout();
 
-        this.AutoScaleDimensions = new SizeF(7F, 15F);
-        this.AutoScaleMode = AutoScaleMode.Font;
+        // Scale by display resolution, not by font metrics. Font mode measures the average character
+        // size, which at 200 percent came out 13 x 32 against a design of 7 x 15 - so 1.86 wide by
+        // 2.13 tall. Every width ended up 7 percent short and every height 7 percent over, which is
+        // what made the toolbar look squeezed and what opened the window taller than the screen. Dpi
+        // mode is linear by definition, and the documentation recommends it for graphics-based
+        // applications and against Font mode when the absolute size matters. Here it matters: in Fit
+        // to window mode the canvas size is the size asked of the shell.
+        this.AutoScaleDimensions = new SizeF(96F, 96F);
+        this.AutoScaleMode = AutoScaleMode.Dpi;
         this.ClientSize = new Size(760, 640);
         this.MinimumSize = new Size(420, 320);
         this.StartPosition = FormStartPosition.CenterScreen;
@@ -182,8 +189,7 @@ internal sealed partial class MainForm
 
         this._menu = new ContextMenuStrip
         {
-            // Same reason as the ToolStrip: the glyphs are rendered at the display's pixel size, and
-            // the 16 by 16 default would resample them back down.
+            // Same as the ToolStrip: kept in step with the size the glyphs were drawn at.
             ImageScalingSize = new Size(this.IconSize, this.IconSize),
         };
         this._menu.Items.AddRange(
@@ -287,7 +293,8 @@ internal sealed partial class MainForm
             CanOverflow = false,
             GripStyle = ToolStripGripStyle.Hidden,
 
-            // Match the size the glyphs were rendered at, or SizeToFit resamples them back down.
+            // Match the size the glyphs were drawn at. Measured on .NET 10 the default already
+            // resolves to the same value, so this states the intent rather than changing anything.
             ImageScalingSize = new Size(this.IconSize, this.IconSize),
             Padding = new Padding(6, 3, 6, 3),
             RenderMode = ToolStripRenderMode.System,

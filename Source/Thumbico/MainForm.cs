@@ -102,6 +102,25 @@ internal sealed partial class MainForm : Form
         }
     }
 
+    /// <summary>
+    /// Asks the shell again once the display scale changes, because the canvas has a new pixel size.
+    /// </summary>
+    /// <remarks>
+    /// Only the request is refreshed. Rebuilding the chrome for a new scale is deliberately not
+    /// attempted; see the display scale section of gui-design.md for what the framework gets wrong
+    /// and why the interface is documented as needing a restart instead. Without this the request
+    /// stays at the old canvas size, because the framework's own resize does not raise OnResizeEnd.
+    /// </remarks>
+    protected override void OnDpiChanged(DpiChangedEventArgs e)
+    {
+        base.OnDpiChanged(e);
+
+        if (this._fixedSize is null)
+        {
+            this.Render();
+        }
+    }
+
     protected override void OnDragEnter(DragEventArgs e)
     {
         base.OnDragEnter(e);
