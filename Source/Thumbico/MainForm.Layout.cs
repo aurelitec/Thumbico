@@ -12,6 +12,12 @@ internal sealed partial class MainForm
     /// <summary>The narrowest the path box is allowed to get, at 100 percent display scale.</summary>
     private const int MinimumPathBoxWidth = 120;
 
+    /// <summary>
+    /// Space around a toolbar button's icon, at 100 percent display scale. A ToolStripButton adds
+    /// none of its own vertically, which left the icon nearly touching the button's edge.
+    /// </summary>
+    private const int ToolbarButtonPadding = 5;
+
     private static readonly string[] StandardSizes =
         ["16", "32", "48", "64", "128", "256", "512", "1024"];
 
@@ -38,10 +44,24 @@ internal sealed partial class MainForm
     private (ToolStripMenuItem Item, ThumbicoOptions Flag)[] _optionItems = null!;
 
     /// <summary>
-    /// The pixel size icons are drawn at, taken from the display scale rather than assumed. A
-    /// bitmap rendered at a fixed 16 is half size on a 200 percent display.
+    /// The size toolbar icons are drawn at, taken from the display scale rather than assumed.
     /// </summary>
-    private int IconSize => 16 * this.DeviceDpi / 96;
+    /// <remarks>
+    /// Deliberately larger than the menu's, and larger than the 16 a ToolStrip defaults to, because
+    /// these buttons carry no text at all and the icon is the whole label. Measured against Windows'
+    /// own toolbars, 16 left the sparser glyphs covering noticeably less of their box; the icon set
+    /// does not inset every glyph equally, so raising the box is the only safe way to fill it.
+    /// </remarks>
+    private int ToolbarIconSize => 20 * this.DeviceDpi / 96;
+
+    /// <summary>
+    /// The size menu icons are drawn at, taken from the display scale rather than assumed.
+    /// </summary>
+    /// <remarks>
+    /// Left at what Windows menus use. The image column is sized against the text row, so a larger
+    /// glyph would force taller rows and sit out of proportion with the text beside it.
+    /// </remarks>
+    private int MenuIconSize => 16 * this.DeviceDpi / 96;
 
     /// <summary>
     /// Releases what the control tree's own disposal does not reach: the current image, which the
@@ -188,8 +208,8 @@ internal sealed partial class MainForm
 
         this._menu = new ContextMenuStrip
         {
-            // Same as the ToolStrip: kept in step with the size the glyphs were drawn at.
-            ImageScalingSize = new Size(this.IconSize, this.IconSize),
+            // Kept in step with the size the menu glyphs were drawn at, which is not the toolbar's.
+            ImageScalingSize = new Size(this.MenuIconSize, this.MenuIconSize),
         };
         this._menu.Items.AddRange(
         [
@@ -227,7 +247,7 @@ internal sealed partial class MainForm
         if (glyph is not null)
         {
             // MenuText rather than ControlText: the menu surface is not the toolbar surface.
-            item.Image = Glyphs.Render(glyph, this.IconSize, SystemColors.MenuText);
+            item.Image = Glyphs.Render(glyph, this.MenuIconSize, SystemColors.MenuText);
         }
 
         if (onClick is not null)
@@ -292,9 +312,9 @@ internal sealed partial class MainForm
             CanOverflow = false,
             GripStyle = ToolStripGripStyle.Hidden,
 
-            // Match the size the glyphs were drawn at. Measured on .NET 10 the default already
-            // resolves to the same value, so this states the intent rather than changing anything.
-            ImageScalingSize = new Size(this.IconSize, this.IconSize),
+            // Match the size the glyphs were drawn at, which the 16 the default resolves to would
+            // otherwise shrink them back to.
+            ImageScalingSize = new Size(this.ToolbarIconSize, this.ToolbarIconSize),
             Padding = new Padding(6, 3, 6, 3),
             RenderMode = ToolStripRenderMode.System,
             TabIndex = 0,
@@ -338,12 +358,15 @@ internal sealed partial class MainForm
 
     private ToolStripButton BuildToolButton(string glyph, string tooltip, EventHandler onClick)
     {
+        int padding = ToolbarButtonPadding * this.DeviceDpi / 96;
+
         ToolStripButton button = new()
         {
             AccessibleName = tooltip,
             AutoToolTip = false,
             DisplayStyle = ToolStripItemDisplayStyle.Image,
-            Image = Glyphs.Render(glyph, this.IconSize, SystemColors.ControlText),
+            Image = Glyphs.Render(glyph, this.ToolbarIconSize, SystemColors.ControlText),
+            Padding = new Padding(padding),
             ToolTipText = tooltip,
         };
         button.Click += onClick;

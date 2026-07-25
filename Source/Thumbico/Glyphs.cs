@@ -37,10 +37,16 @@ internal static class Glyphs
 
     private const string ResourceName = "Thumbico.Assets.Thumbico.Icons.ttf";
 
+    /// <summary>
+    /// Alpha below which a pixel counts as empty when the ink is measured, so that the faintest
+    /// antialiasing does not widen the result by a pixel on every edge.
+    /// </summary>
+    private const int InkAlphaThreshold = 24;
+
     private static readonly PrivateFontCollection Collection = LoadFont();
 
     /// <summary>
-    /// Draws one glyph into a square bitmap over a transparent background.
+    /// Draws one glyph into a square bitmap over a transparent background, centred on its ink.
     /// </summary>
     /// <param name="glyph">One of the code point constants on this class.</param>
     /// <param name="size">The edge length in pixels. The caller derives this from the display scale
@@ -48,7 +54,26 @@ internal static class Glyphs
     /// <param name="color">The ink colour. The caller takes this from the surface the bitmap will
     /// sit on, so the icon follows the light or dark theme.</param>
     /// <returns>A new bitmap that the caller owns.</returns>
+    /// <remarks>
+    /// Drawn twice on purpose. GDI+ centres the text line box rather than the visible glyph, and this
+    /// font's line box is taller than its em while having no descent to balance it, so one pass leaves
+    /// every glyph sitting high in the bitmap - by a different amount for each, which is why no fixed
+    /// correction would do. The first pass finds where the ink landed and the second redraws it
+    /// centred on that.
+    /// </remarks>
     internal static Bitmap Render(string glyph, int size, Color color)
+    {
+        using Bitmap probe = Draw(glyph, size, Color.Black, PointF.Empty);
+        Rectangle ink = InkBounds(probe);
+
+        PointF offset = ink.IsEmpty
+            ? PointF.Empty
+            : new PointF(((size - ink.Width) / 2f) - ink.X, ((size - ink.Height) / 2f) - ink.Y);
+
+        return Draw(glyph, size, color, offset);
+    }
+
+    private static Bitmap Draw(string glyph, int size, Color color, PointF offset)
     {
         Bitmap bitmap = new(size, size);
 
@@ -59,14 +84,45 @@ internal static class Glyphs
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center,
+
+            // The layout rectangle is deliberately moved off the bitmap, and clipping it to the
+            // rectangle rather than to the bitmap would shave the shifted edge.
+            FormatFlags = StringFormatFlags.NoClip,
         })
         {
             // DrawString is the GDI+ path, which is the one documented to see a memory font.
             graphics.TextRenderingHint = TextRenderingHint.AntiAlias;
-            graphics.DrawString(glyph, font, brush, new RectangleF(0, 0, size, size), format);
+            graphics.DrawString(glyph, font, brush, new RectangleF(offset.X, offset.Y, size, size), format);
         }
 
         return bitmap;
+    }
+
+    /// <summary>
+    /// The smallest rectangle holding every pixel the glyph actually marked.
+    /// </summary>
+    private static Rectangle InkBounds(Bitmap bitmap)
+    {
+        int left = int.MaxValue;
+        int top = int.MaxValue;
+        int right = -1;
+        int bottom = -1;
+
+        for (int y = 0; y < bitmap.Height; y++)
+        {
+            for (int x = 0; x < bitmap.Width; x++)
+            {
+                if (bitmap.GetPixel(x, y).A > InkAlphaThreshold)
+                {
+                    left = Math.Min(left, x);
+                    right = Math.Max(right, x);
+                    top = Math.Min(top, y);
+                    bottom = Math.Max(bottom, y);
+                }
+            }
+        }
+
+        return right < 0 ? Rectangle.Empty : new Rectangle(left, top, right - left + 1, bottom - top + 1);
     }
 
     private static PrivateFontCollection LoadFont()
