@@ -62,13 +62,12 @@ internal sealed partial class MainForm
     {
         this.SuspendLayout();
 
-        // Scale by display resolution, not by font metrics. Font mode measures the average character
-        // size, which at 200 percent came out 13 x 32 against a design of 7 x 15 - so 1.86 wide by
-        // 2.13 tall. Every width ended up 7 percent short and every height 7 percent over, which is
-        // what made the toolbar look squeezed and what opened the window taller than the screen. Dpi
-        // mode is linear by definition, and the documentation recommends it for graphics-based
-        // applications and against Font mode when the absolute size matters. Here it matters: in Fit
-        // to window mode the canvas size is the size asked of the shell.
+        // Scale by display resolution, not by font metrics. Font mode derives its factor from average
+        // character size, which does not grow evenly in both directions, so widths and heights end up
+        // scaled differently - a squeezed toolbar and a window taller than it should be. Dpi mode is
+        // linear by definition, and the documentation recommends it for graphics-based applications
+        // and against Font mode where the absolute size matters. Here it matters: in Fit to window
+        // mode the canvas size is the size asked of the shell. Measurements in gui-design.md.
         this.AutoScaleDimensions = new SizeF(96F, 96F);
         this.AutoScaleMode = AutoScaleMode.Dpi;
         this.ClientSize = new Size(760, 640);

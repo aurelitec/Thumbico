@@ -74,11 +74,12 @@ internal sealed partial class MainForm : Form
     /// line.
     /// </summary>
     /// <remarks>
-    /// The design size is written at 100 percent scale, and font scaling inflates it by more than
-    /// the display scale alone: on a 1080p screen at 150 percent it came out 1106 pixels tall and
-    /// hung its status bar off the bottom of the desktop. Both the clamp and the first render belong
-    /// here rather than in the constructor, because scaling has not been applied while that runs and
-    /// Fit to window would size the first request against a canvas that is about to change.
+    /// The design size is written at 100 percent scale, so on a sufficiently scaled display it can
+    /// exceed the work area and hang the status bar off the bottom of the desktop. Scaling by DPI
+    /// makes that far less likely than the font scaling this once compensated for, but the ceiling is
+    /// the screen rather than the scale factor, so the clamp stays. Both it and the first render
+    /// belong here rather than in the constructor, because scaling has not been applied while that
+    /// runs and Fit to window would size the first request against a canvas that is about to change.
     /// </remarks>
     protected override void OnLoad(EventArgs e)
     {
