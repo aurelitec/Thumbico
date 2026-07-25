@@ -4,7 +4,7 @@ Thumbico bundles the third party material listed below. Everything else in this 
 
 ## Fluent UI System Icons
 
-`Source/Thumbico/Assets/Thumbico.Icons.ttf` is a subset of Microsoft's Fluent UI System Icons, cut down to the eighteen glyphs the interface uses. The full font is 1.53 MB; the subset is 4 KB.
+`Source/Thumbico/Assets/Thumbico.Icons.ttf` is a subset of Microsoft's Fluent UI System Icons, cut down to the nineteen glyphs the interface uses. The full font is 1.53 MB; the subset is 4 KB.
 
 - Upstream: <https://github.com/microsoft/fluentui-system-icons>
 - Source file: `fonts/FluentSystemIcons-Resizable.ttf`

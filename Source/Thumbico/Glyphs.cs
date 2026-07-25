@@ -36,6 +36,15 @@ internal static class Glyphs
     internal const string Help = "\uEF07";           // question_circle
     internal const string About = "\uEA88";          // info
 
+    /// <summary>The tick a checked menu item shows, drawn as that item's icon.</summary>
+    /// <remarks>
+    /// Ours rather than the framework's, because the framework stretches its own check bitmap to fill
+    /// whatever the image column is, and this menu's column is wider than that bitmap was drawn for.
+    /// Supplying the tick as an ordinary icon puts it in the one column, at the one size, alongside
+    /// every other glyph here.
+    /// </remarks>
+    internal const string Checkmark = "\uE460";      // checkmark
+
     private const string ResourceName = "Thumbico.Assets.Thumbico.Icons.ttf";
 
     private static readonly PrivateFontCollection Collection = LoadFont();

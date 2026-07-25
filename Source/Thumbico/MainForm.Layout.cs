@@ -65,6 +65,16 @@ internal sealed partial class MainForm
     private ToolStripMenuItem[] _sourceItems = null!;
     private (ToolStripMenuItem Item, ThumbicoOptions Flag)[] _optionItems = null!;
 
+    /// <summary>The two images an item with no icon of its own alternates between.</summary>
+    /// <remarks>
+    /// One tick and one empty box, shared by every such item rather than built per item or per toggle.
+    /// Both are needed at the full image size: the blank one because a row only takes the image
+    /// column's height if it has an image at all, and the tick because the framework's own check is
+    /// stretched to that column and arrives blurry.
+    /// </remarks>
+    private Bitmap _menuCheckImage = null!;
+    private Bitmap _menuBlankImage = null!;
+
     /// <summary>
     /// The size toolbar icons are drawn at, taken from the display scale rather than assumed.
     /// </summary>
@@ -102,6 +112,17 @@ internal sealed partial class MainForm
     private int MenuGlyphSize => 16 * this.DeviceDpi / 96;
 
     /// <summary>
+    /// The size a check mark is drawn at inside the image box, taken from the display scale.
+    /// </summary>
+    /// <remarks>
+    /// Smaller than the icons on purpose, and not because it is larger - measured at a shared size its
+    /// ink is 24.8 by 18.4 against the folder's 27.3 by 22.4, the smallest ink area in the set. The tick
+    /// is a single stroke spanning most of its box while every other glyph here is a closed form, so it
+    /// reads heavier at the same size. Two logical pixels down settles it against the icons above.
+    /// </remarks>
+    private int MenuCheckGlyphSize => 14 * this.DeviceDpi / 96;
+
+    /// <summary>
     /// Releases what the control tree's own disposal does not reach: the current image, which the
     /// canvas borrows rather than owns, and the menu, which belongs to no control's collection.
     /// </summary>
@@ -111,6 +132,8 @@ internal sealed partial class MainForm
         {
             this._thumbico?.Dispose();
             this._menu?.Dispose();
+            this._menuCheckImage?.Dispose();
+            this._menuBlankImage?.Dispose();
         }
 
         base.Dispose(disposing);
@@ -167,6 +190,10 @@ internal sealed partial class MainForm
     /// </remarks>
     private void BuildMenu()
     {
+        this._menuCheckImage = Glyphs.Render(
+            Glyphs.Checkmark, this.MenuCheckGlyphSize, this.MenuImageSize, SystemColors.MenuText);
+        this._menuBlankImage = new Bitmap(this.MenuImageSize, this.MenuImageSize);
+
         ToolStripMenuItem open = this.BuildItem(
             Strings.MenuOpen, Glyphs.Open, Keys.Control | Keys.O, this.OnOpenClicked);
         // Windows Forms labels a shortcut from the Keys enum, which spells these two "Ctrl+Oemplus"
@@ -241,8 +268,6 @@ internal sealed partial class MainForm
             Strings.MenuBackgroundSolidColor, null, Keys.None, this.OnSolidColorSelected);
         background.DropDownItems.AddRange([this._checkerboardItem, this._solidColorItem]);
 
-        UseCheckColumn(source, advanced, background);
-
         this._nakedModeItem = this.BuildItem(
             Strings.MenuNakedMode, Glyphs.NakedMode, Keys.Control | Keys.N, this.OnNakedMode);
 
@@ -278,25 +303,12 @@ internal sealed partial class MainForm
         this._sourceItems[0].Checked = true;
     }
 
-    /// <summary>
-    /// Moves the given submenus' check marks into a column of their own.
-    /// </summary>
-    /// <remarks>
-    /// Every checkable item in these three carries no icon, so its tick would otherwise be drawn into
-    /// the image column - and that column is sized for the padded glyph box, which is half again the
-    /// size the framework's check bitmap was drawn at, so the tick arrived stretched and off centre.
-    /// A check column is sized for a check, and the framework then places it correctly. Dropping the
-    /// image margin with it costs nothing, because none of these items has an image to put there.
-    /// </remarks>
-    private static void UseCheckColumn(params ToolStripMenuItem[] parents)
+    /// <summary>Swaps an iconless item between the tick and the empty box as it is checked.</summary>
+    private void OnMenuItemCheckedChanged(object? sender, EventArgs e)
     {
-        foreach (ToolStripMenuItem parent in parents)
+        if (sender is ToolStripMenuItem item)
         {
-            if (parent.DropDown is ToolStripDropDownMenu menu)
-            {
-                menu.ShowCheckMargin = true;
-                menu.ShowImageMargin = false;
-            }
+            item.Image = item.Checked ? this._menuCheckImage : this._menuBlankImage;
         }
     }
 
@@ -307,10 +319,18 @@ internal sealed partial class MainForm
     {
         ToolStripMenuItem item = new(text) { ShortcutKeys = shortcut };
 
-        if (glyph is not null)
+        if (glyph is null)
+        {
+            // No icon of its own, so it shows the tick when checked and an empty box otherwise. Bound
+            // to the item's own event rather than updated at each call site, of which there are nine.
+            // The empty box is not decoration: a row only takes the image column's height if it has an
+            // image at all, so without it this row alone would stay at the tighter text height.
+            item.CheckedChanged += this.OnMenuItemCheckedChanged;
+            item.Image = this._menuBlankImage;
+        }
+        else
         {
             // MenuText rather than ControlText: the menu surface is not the toolbar surface.
-            // A 16 glyph in a larger box: the box opens the row up, the glyph stays menu-sized.
             item.Image = Glyphs.Render(glyph, this.MenuGlyphSize, this.MenuImageSize, SystemColors.MenuText);
         }
 
