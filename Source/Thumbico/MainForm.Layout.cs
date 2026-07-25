@@ -26,6 +26,20 @@ internal sealed partial class MainForm
     /// </remarks>
     private const int ToolbarItemSpacing = 4;
 
+    /// <summary>Space each side of a status bar pane's text, at 100 percent display scale.</summary>
+    /// <remarks>
+    /// A pane is given none at all, so its text sits hard against the divider line beside it and one
+    /// pixel from the window edge. This separates both.
+    /// </remarks>
+    private const int StatusPaneHorizontalPadding = 8;
+
+    /// <summary>Space above and below a status bar pane's text, at 100 percent display scale.</summary>
+    /// <remarks>
+    /// Sets the bar's height, which the framework otherwise leaves at 23 logical pixels - noticeably
+    /// tighter than the status bars Windows' own applications draw.
+    /// </remarks>
+    private const int StatusPaneVerticalPadding = 3;
+
     private static readonly string[] StandardSizes =
         ["16", "32", "48", "64", "128", "256", "512", "1024"];
 
@@ -357,12 +371,36 @@ internal sealed partial class MainForm
 
     private void BuildStatusStrip()
     {
-        this._askedLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Right };
-        this._returnedLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Right };
-        this._kindLabel = new ToolStripStatusLabel();
+        // Divider on each pane's leading edge, so the group is bounded where it begins rather than
+        // trailing off into the sizing grip.
+        this._askedLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Left };
+        this._returnedLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Left };
+        this._kindLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Left };
 
         this._statusStrip = new StatusStrip { SizingGrip = true };
-        this._statusStrip.Items.AddRange([this._askedLabel, this._returnedLabel, this._kindLabel]);
+
+        // The empty first pane is what puts the rest against the right edge. Windows' status bar model
+        // is a stretching message line first and the indicators after it, and all three of ours are
+        // indicators rather than messages. Spring is the StatusStrip's own way to hand one pane the
+        // slack; ToolStripItem.Alignment cannot do it, because a StatusStrip lays out as a table and
+        // a table ignores Alignment.
+        this._statusStrip.Items.AddRange(
+        [
+            new ToolStripStatusLabel { Spring = true },
+            this._askedLabel,
+            this._returnedLabel,
+            this._kindLabel,
+        ]);
+
+        // Scaled by hand, as every item value must be: autoscale reaches a StatusStrip's own padding
+        // but nothing belonging to the items inside it.
+        int horizontal = StatusPaneHorizontalPadding * this.DeviceDpi / 96;
+        int vertical = StatusPaneVerticalPadding * this.DeviceDpi / 96;
+
+        foreach (ToolStripItem pane in this._statusStrip.Items)
+        {
+            pane.Padding = new Padding(horizontal, vertical, horizontal, vertical);
+        }
     }
 
     /// <summary>Separates the toolbar items, which the framework's own margins barely do.</summary>
