@@ -27,6 +27,21 @@ internal sealed class ThumbicoCanvas : Panel
         this.AutoScroll = true;
         this.DoubleBuffered = true;
         this.SetStyle(ControlStyles.ResizeRedraw, true);
+
+        // A Panel turns Selectable off and defaults TabStop to false, so on its own it cannot hold
+        // focus. Both go back on here: the canvas scrolls, so it has keys of its own to receive, and
+        // it is the only thing besides the toolbar that Tab can reach. Without it the toolbar is the
+        // form's sole tab stop, and focus that enters the toolbar can never leave it.
+        this.SetStyle(ControlStyles.Selectable, true);
+        this.TabStop = true;
+    }
+
+    /// <summary>Takes focus on a click, which a Panel does not do by itself.</summary>
+    protected override void OnMouseDown(MouseEventArgs e)
+    {
+        base.OnMouseDown(e);
+
+        this.Focus();
     }
 
     /// <summary>Gets or sets the image to show. The canvas does not own it.</summary>
