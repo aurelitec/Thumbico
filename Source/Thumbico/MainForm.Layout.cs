@@ -77,13 +77,29 @@ internal sealed partial class MainForm
     private int ToolbarIconSize => 20 * this.DeviceDpi / 96;
 
     /// <summary>
-    /// The size menu icons are drawn at, taken from the display scale rather than assumed.
+    /// The box a menu image occupies, taken from the display scale rather than assumed.
     /// </summary>
     /// <remarks>
-    /// Left at what Windows menus use. The image column is sized against the text row, so a larger
-    /// glyph would force taller rows and sit out of proportion with the text beside it.
+    /// This is what sets the row height, because a row is at least as tall as the image column, and it
+    /// is the only lever that opens the rows up while keeping their contents centred. Both documented
+    /// alternatives were tried and measured, and both fail the same way: item Padding, and AutoSize off
+    /// with an explicit Size, each inflate the item without the drop-down recomputing its text
+    /// rectangle, so the text and shortcut end up against the top of the row - by the same offsets to
+    /// the pixel. Was 16, on the reasoning that taller rows were to be avoided; once they became the
+    /// goal that reasoning inverted. Measured, this gives a 26 logical row where 16 gave 18.
     /// </remarks>
-    private int MenuIconSize => 16 * this.DeviceDpi / 96;
+    private int MenuImageSize => 24 * this.DeviceDpi / 96;
+
+    /// <summary>
+    /// The size a menu glyph is drawn at inside that box, taken from the display scale.
+    /// </summary>
+    /// <remarks>
+    /// Deliberately smaller than the box, and left at what Windows menus use. Separating the two is
+    /// what buys open rows without oversized icons: the row is as tall as the image column, while the
+    /// ink stays 16 and the surplus is transparent padding. Tying them together made the rows right and
+    /// the icons visibly too large.
+    /// </remarks>
+    private int MenuGlyphSize => 16 * this.DeviceDpi / 96;
 
     /// <summary>
     /// Releases what the control tree's own disposal does not reach: the current image, which the
@@ -225,13 +241,16 @@ internal sealed partial class MainForm
             Strings.MenuBackgroundSolidColor, null, Keys.None, this.OnSolidColorSelected);
         background.DropDownItems.AddRange([this._checkerboardItem, this._solidColorItem]);
 
+        UseCheckColumn(source, advanced, background);
+
         this._nakedModeItem = this.BuildItem(
             Strings.MenuNakedMode, Glyphs.NakedMode, Keys.Control | Keys.N, this.OnNakedMode);
 
         this._menu = new ContextMenuStrip
         {
-            // Kept in step with the size the menu glyphs were drawn at, which is not the toolbar's.
-            ImageScalingSize = new Size(this.MenuIconSize, this.MenuIconSize),
+            // The box the glyphs are padded out to, which is larger than the glyphs themselves and
+            // larger than the toolbar's. This is what gives the rows their height.
+            ImageScalingSize = new Size(this.MenuImageSize, this.MenuImageSize),
         };
         this._menu.Items.AddRange(
         [
@@ -259,6 +278,28 @@ internal sealed partial class MainForm
         this._sourceItems[0].Checked = true;
     }
 
+    /// <summary>
+    /// Moves the given submenus' check marks into a column of their own.
+    /// </summary>
+    /// <remarks>
+    /// Every checkable item in these three carries no icon, so its tick would otherwise be drawn into
+    /// the image column - and that column is sized for the padded glyph box, which is half again the
+    /// size the framework's check bitmap was drawn at, so the tick arrived stretched and off centre.
+    /// A check column is sized for a check, and the framework then places it correctly. Dropping the
+    /// image margin with it costs nothing, because none of these items has an image to put there.
+    /// </remarks>
+    private static void UseCheckColumn(params ToolStripMenuItem[] parents)
+    {
+        foreach (ToolStripMenuItem parent in parents)
+        {
+            if (parent.DropDown is ToolStripDropDownMenu menu)
+            {
+                menu.ShowCheckMargin = true;
+                menu.ShowImageMargin = false;
+            }
+        }
+    }
+
     private ToolStripMenuItem BuildItem(string text, string? glyph)
         => this.BuildItem(text, glyph, Keys.None, null);
 
@@ -269,7 +310,8 @@ internal sealed partial class MainForm
         if (glyph is not null)
         {
             // MenuText rather than ControlText: the menu surface is not the toolbar surface.
-            item.Image = Glyphs.Render(glyph, this.MenuIconSize, SystemColors.MenuText);
+            // A 16 glyph in a larger box: the box opens the row up, the glyph stays menu-sized.
+            item.Image = Glyphs.Render(glyph, this.MenuGlyphSize, this.MenuImageSize, SystemColors.MenuText);
         }
 
         if (onClick is not null)

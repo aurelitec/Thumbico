@@ -44,8 +44,21 @@ internal static class Glyphs
     /// Draws one glyph into a square bitmap over a transparent background, centred on its ink.
     /// </summary>
     /// <param name="glyph">One of the code point constants on this class.</param>
-    /// <param name="size">The edge length in pixels. The caller derives this from the display scale
-    /// rather than assuming 16.</param>
+    /// <param name="size">The edge length in pixels, for both the glyph and the bitmap. The caller
+    /// derives this from the display scale rather than assuming 16.</param>
+    /// <param name="color">The ink colour. The caller takes this from the surface the bitmap will
+    /// sit on, so the icon follows the light or dark theme.</param>
+    /// <returns>A new bitmap that the caller owns.</returns>
+    internal static Bitmap Render(string glyph, int size, Color color)
+        => Render(glyph, size, size, color);
+
+    /// <summary>
+    /// Draws one glyph centred in a larger square bitmap, the surplus left transparent.
+    /// </summary>
+    /// <param name="glyph">One of the code point constants on this class.</param>
+    /// <param name="size">The edge length the glyph itself is drawn at, in pixels.</param>
+    /// <param name="box">The edge length of the bitmap, in pixels. Anything beyond the glyph is
+    /// transparent padding, which is how a caller buys space around an icon without enlarging it.</param>
     /// <param name="color">The ink colour. The caller takes this from the surface the bitmap will
     /// sit on, so the icon follows the light or dark theme.</param>
     /// <returns>A new bitmap that the caller owns.</returns>
@@ -55,9 +68,9 @@ internal static class Glyphs
     /// sitting high, by a different amount for each. An outline can be asked where its own ink is.
     /// Filling geometry also avoids the question of which text paths can see a memory font.
     /// </remarks>
-    internal static Bitmap Render(string glyph, int size, Color color)
+    internal static Bitmap Render(string glyph, int size, int box, Color color)
     {
-        Bitmap bitmap = new(size, size);
+        Bitmap bitmap = new(box, box);
 
         using GraphicsPath path = new();
         using (StringFormat format = StringFormat.GenericTypographic)
@@ -66,10 +79,11 @@ internal static class Glyphs
                 glyph, Collection.Families[0], (int)FontStyle.Regular, size, PointF.Empty, format);
         }
 
+        // Centred against the bitmap rather than the glyph, so the padding splits evenly around it.
         RectangleF ink = path.GetBounds();
         using (Matrix centre = new())
         {
-            centre.Translate(((size - ink.Width) / 2f) - ink.X, ((size - ink.Height) / 2f) - ink.Y);
+            centre.Translate(((box - ink.Width) / 2f) - ink.X, ((box - ink.Height) / 2f) - ink.Y);
             path.Transform(centre);
         }
 
