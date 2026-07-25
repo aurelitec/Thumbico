@@ -12,6 +12,10 @@ namespace Thumbico;
 /// <remarks>
 /// Scaling for display was rejected deliberately: the product exists to show what the shell produced
 /// at a requested size, and a resampled preview is a picture of the resampling instead.
+///
+/// It also takes no focus, which is equally deliberate. A Panel is neither selectable nor a tab stop,
+/// and leaving it that way makes the toolbar the only thing the Tab key ever visits. The cost is that
+/// scrolling is by wheel and scrollbar rather than by arrow key.
 /// </remarks>
 internal sealed class ThumbicoCanvas : Panel
 {
@@ -27,21 +31,6 @@ internal sealed class ThumbicoCanvas : Panel
         this.AutoScroll = true;
         this.DoubleBuffered = true;
         this.SetStyle(ControlStyles.ResizeRedraw, true);
-
-        // A Panel turns Selectable off and defaults TabStop to false, so on its own it cannot hold
-        // focus. Both go back on here: the canvas scrolls, so it has keys of its own to receive, and
-        // it is the only thing besides the toolbar that Tab can reach. Without it the toolbar is the
-        // form's sole tab stop, and focus that enters the toolbar can never leave it.
-        this.SetStyle(ControlStyles.Selectable, true);
-        this.TabStop = true;
-    }
-
-    /// <summary>Takes focus on a click, which a Panel does not do by itself.</summary>
-    protected override void OnMouseDown(MouseEventArgs e)
-    {
-        base.OnMouseDown(e);
-
-        this.Focus();
     }
 
     /// <summary>Gets or sets the image to show. The canvas does not own it.</summary>

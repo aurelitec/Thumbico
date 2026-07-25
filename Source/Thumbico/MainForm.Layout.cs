@@ -326,7 +326,12 @@ internal sealed partial class MainForm
             Padding = new Padding(6, 3, 6, 3),
             RenderMode = ToolStripRenderMode.System,
             TabIndex = 0,
-            TabStop = true,
+
+            // Left at the default false on purpose. True means what its documentation says - one Tab
+            // enters the strip, the arrow keys move within it, and the next Tab leaves - which strands
+            // the path box and the size combo, because an arrow key inside a text box moves the caret
+            // rather than moving on. False instead lets Tab step through the items one at a time.
+            TabStop = false,
         };
         this._toolStrip.Items.AddRange(
             [this._openButton, this._pathBox, this._sizeBox, this._refreshButton, this._menuButton]);

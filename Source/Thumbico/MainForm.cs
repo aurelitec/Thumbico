@@ -104,6 +104,23 @@ internal sealed partial class MainForm : Form
     }
 
     /// <summary>
+    /// Puts the caret in the path box, which is what makes the Tab key work at all.
+    /// </summary>
+    /// <remarks>
+    /// The toolbar is the only thing Tab visits, and a ToolStrip whose TabStop is off cannot be
+    /// entered by Tab, so focus has to begin inside it. It also has to begin on one of the two hosted
+    /// controls rather than on a button: seeded on a button, Tab does not move at all, which is the
+    /// framework's own open accessibility bug, dotnet/winforms#5794. Measured both ways. This belongs
+    /// here rather than in OnLoad because the window has to be on screen for the focus to stick.
+    /// </remarks>
+    protected override void OnShown(EventArgs e)
+    {
+        base.OnShown(e);
+
+        this._pathBox.Focus();
+    }
+
+    /// <summary>
     /// Asks the shell again once the display scale changes, because the canvas has a new pixel size.
     /// </summary>
     /// <remarks>
