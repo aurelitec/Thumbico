@@ -285,6 +285,10 @@ internal sealed partial class MainForm
         {
             AccessibleName = Strings.PathBoxAccessibleName,
             AutoSize = false,
+
+            // Let the strip draw the frame instead of the text box drawing its own, so the path box
+            // and the combo beside it are bordered alike.
+            BorderStyle = BorderStyle.None,
             Width = 320,
         };
         this._pathBox.KeyDown += this.OnPathBoxKeyDown;
@@ -305,6 +309,15 @@ internal sealed partial class MainForm
         this._sizeBox.SelectedIndexChanged += this.OnSizeBoxCommitted;
         this._sizeBox.LostFocus += this.OnSizeBoxCommitted;
         this._sizeBox.KeyDown += this.OnSizeBoxKeyDown;
+
+        // Give the path box the combo's height so the two read as one pair. A floor rather than an
+        // assigned Height on purpose: assigning Height needs TextBoxBase.AutoSize off, and a
+        // single-line text box then draws its text at the top, having no vertical alignment of its
+        // own. A minimum leaves AutoSize on, so the text stays centred. Height only - the combo's
+        // full Size would also impose its width as a floor, quietly competing with StretchPathBox.
+        // The combo reports its height correctly here, before either has been laid out, because that
+        // height comes from the font.
+        this._pathBox.TextBox.MinimumSize = new Size(0, this._sizeBox.Height);
 
         this._refreshButton = this.BuildToolButton(
             Glyphs.Refresh, Strings.RefreshButtonTooltip, this.OnRefreshClicked);
