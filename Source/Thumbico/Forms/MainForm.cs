@@ -149,6 +149,20 @@ internal sealed partial class MainForm : Form
         }
     }
 
+    /// <summary>Yields Ctrl+C to a toolbar field with a selection; the menu's Copy takes it otherwise.</summary>
+    /// <remarks>Skipping the base call is what frees the key; a focus-only test would lose Copy after a drop.</remarks>
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+    {
+        if (keyData == (Keys.Control | Keys.C)
+            && ((this._pathBox.Focused && this._pathBox.TextBox.SelectionLength > 0)
+                || (this._sizeBox.Focused && this._sizeBox.ComboBox.SelectionLength > 0)))
+        {
+            return false;
+        }
+
+        return base.ProcessCmdKey(ref msg, keyData);
+    }
+
     /// <summary>
     /// F5 reloads and Escape leaves Naked Mode. Neither command has a menu item to carry a shortcut,
     /// so the form takes both keys itself.
