@@ -61,6 +61,7 @@ internal sealed partial class MainForm
     private ToolStripButton _menuButton = null!;
     private ThumbicoCanvas _canvas = null!;
     private StatusStrip _statusStrip = null!;
+    private ToolStripStatusLabel _messageLabel = null!;
     private ToolStripStatusLabel _askedLabel = null!;
     private ToolStripStatusLabel _returnedLabel = null!;
     private ToolStripStatusLabel _kindLabel = null!;
@@ -446,16 +447,22 @@ internal sealed partial class MainForm
         this._returnedLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Left };
         this._kindLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Left };
 
-        this._statusStrip = new StatusStrip { SizingGrip = true };
+        // The stretching first pane is both what pushes the indicators against the right edge and
+        // where a message goes. Windows' status bar model is a message line first and the indicators
+        // after it, which is the layout this produces. Spring is the StatusStrip's own way to hand one
+        // pane the slack; ToolStripItem.Alignment cannot do it, because a StatusStrip lays out as a
+        // table and a table ignores Alignment. Left aligned explicitly, because a message line is
+        // left aligned by that same convention and it should not depend on the default.
+        this._messageLabel = new ToolStripStatusLabel
+        {
+            Spring = true,
+            TextAlign = ContentAlignment.MiddleLeft,
+        };
 
-        // The empty first pane is what puts the rest against the right edge. Windows' status bar model
-        // is a stretching message line first and the indicators after it, and all three of ours are
-        // indicators rather than messages. Spring is the StatusStrip's own way to hand one pane the
-        // slack; ToolStripItem.Alignment cannot do it, because a StatusStrip lays out as a table and
-        // a table ignores Alignment.
+        this._statusStrip = new StatusStrip { SizingGrip = true };
         this._statusStrip.Items.AddRange(
         [
-            new ToolStripStatusLabel { Spring = true },
+            this._messageLabel,
             this._askedLabel,
             this._returnedLabel,
             this._kindLabel,
@@ -470,6 +477,9 @@ internal sealed partial class MainForm
         {
             pane.Padding = new Padding(horizontal, vertical, horizontal, vertical);
         }
+
+        // Nothing is loaded yet, so the bar carries the prompt instead of a shell transaction.
+        this.SetStatusMessage(Strings.DropPrompt);
     }
 
     /// <summary>Separates the toolbar items, which the framework's own margins barely do.</summary>

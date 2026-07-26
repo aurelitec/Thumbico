@@ -89,16 +89,11 @@ internal sealed class ThumbicoCanvas : Panel
     {
         this.PaintBackdrop(e.Graphics);
 
+        // Nothing to draw over the backdrop until an item is rendered. The prompt that used to sit
+        // here moved to the status bar, where it is drawn in chrome colours and so stays legible
+        // whatever backdrop colour the user picks - grey on a mid-grey backdrop was invisible.
         if (this._image is null)
         {
-            TextRenderer.DrawText(
-                e.Graphics,
-                Strings.DropPrompt,
-                this.Font,
-                this.ClientRectangle,
-                SystemColors.GrayText,
-                TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-
             return;
         }
 

@@ -193,6 +193,10 @@ internal sealed partial class MainForm : Form
             return;
         }
 
+        // There is an item in play now, so the bar reports the shell transaction rather than the
+        // prompt - including when the render below fails, since an error is about that transaction.
+        this.SetStatusMessage(null);
+
         Size asked = this.RequestedSize;
         ThumbicoImage loaded;
 
@@ -250,6 +254,33 @@ internal sealed partial class MainForm : Form
         {
             image.ToGrayscale();
         }
+    }
+
+    /// <summary>
+    /// Shows one message across the whole bar, or hands the bar back to its three indicators.
+    /// </summary>
+    /// <remarks>
+    /// The flat form is what a Delphi status bar called a simple panel, and what Windows Forms' own
+    /// StatusBar had as ShowPanels before that control was retired - `StatusStrip` has no equivalent
+    /// property. It needs none: the first pane springs, so filling it and hiding the indicators takes
+    /// their dividers with them and leaves a bar with no sections at all.
+    ///
+    /// It also stops the bar collapsing. A pane takes its height from its text, so with every pane
+    /// empty before the first render the bar sat visibly squashed; now one side or the other always has
+    /// text. The two states are still a few pixels apart, which is accepted - see the backlog.
+    ///
+    /// Visible rather than Available on the indicators, though either would do: setting one sets the
+    /// other, and Available is what governs whether an item is placed on the strip at all, so hiding
+    /// really does take each divider with it rather than leaving an empty cell.
+    /// </remarks>
+    private void SetStatusMessage(string? message)
+    {
+        this._messageLabel.Text = message ?? string.Empty;
+
+        bool indicators = message is null;
+        this._askedLabel.Visible = indicators;
+        this._returnedLabel.Visible = indicators;
+        this._kindLabel.Visible = indicators;
     }
 
     /// <summary>
