@@ -94,7 +94,7 @@ public sealed class ThumbicoImage : IDisposable
         {
             attributes.SetColorMatrix(GrayscaleMatrix);
 
-            // Take the result as it is, so the transparent canvas underneath cannot alter the alpha.
+            // SourceCopy, or the transparent canvas underneath blends into the alpha.
             graphics.CompositingMode = CompositingMode.SourceCopy;
             graphics.DrawImage(
                 this.Bitmap,
@@ -152,8 +152,8 @@ public sealed class ThumbicoImage : IDisposable
     };
 
     /// <summary>
-    /// Rec. 709 luma weights, which match the sRGB primaries the shell returns. The alpha row is
-    /// left as an identity so transparency passes through untouched.
+    /// Rec. 709 luma weights, matching the sRGB primaries the shell returns. The alpha row is an
+    /// identity, so transparency passes through.
     /// </summary>
     private static readonly ColorMatrix GrayscaleMatrix = new(
     [

@@ -37,9 +37,8 @@ public class GlyphsTests
             .Select(field => (field.Name, ((string)field.GetRawConstantValue()!)[0]));
 
     /// <summary>
-    /// The guard that matters. A code point the subset does not carry still renders, because
-    /// Windows substitutes another font, so the wrong icon ships looking perfectly deliberate. That
-    /// is exactly how the two Segoe MDL2 rotate code points survived review.
+    /// The guard that matters: a code point the subset lacks still renders, because Windows substitutes
+    /// another font, so a wrong icon ships looking deliberate.
     /// </summary>
     [Theory]
     [MemberData(nameof(DeclaredGlyphs))]
@@ -52,8 +51,8 @@ public class GlyphsTests
     }
 
     /// <summary>
-    /// The subset carries nothing the interface does not use, which is what keeps it at 4 KB and
-    /// what makes regenerating it from the constants correct.
+    /// The subset carries nothing the interface does not use, which is what keeps it small and what
+    /// makes regenerating it from the constants correct.
     /// </summary>
     [Fact]
     public void WhenTheFontIsReadThenItMapsExactlyTheDeclaredGlyphs()
@@ -72,10 +71,7 @@ public class GlyphsTests
         Assert.True(HasInk(rendered), $"{name} rendered as a blank bitmap.");
     }
 
-    /// <summary>
-    /// Pins the exact defect that reversed the icon decision: two code points that both resolve and
-    /// both draw the same picture.
-    /// </summary>
+    /// <summary>Two code points can both resolve and still draw the same picture.</summary>
     [Fact]
     public void WhenRotateLeftAndRotateRightAreRenderedThenTheyDiffer()
     {
@@ -85,10 +81,7 @@ public class GlyphsTests
         Assert.False(AreIdentical(left, right), "Rotate Left and Rotate Right render identically.");
     }
 
-    /// <summary>
-    /// Dark mode depends on this: an icon baked to a fixed colour would vanish against dark chrome,
-    /// and nothing else in the suite would notice.
-    /// </summary>
+    /// <summary>Dark mode depends on this: an icon baked to a fixed colour vanishes on dark chrome.</summary>
     [Fact]
     public void WhenAColorIsGivenThenTheGlyphIsDrawnInIt()
     {
@@ -97,9 +90,7 @@ public class GlyphsTests
         Assert.Contains(Pixels(red), pixel => pixel.A > 128 && pixel.R > 128 && pixel.G < 64);
     }
 
-    /// <summary>
-    /// Display scale depends on this: the caller asks for the pixel size the current DPI needs.
-    /// </summary>
+    /// <summary>Display scale depends on this: the caller asks for the pixel size the DPI needs.</summary>
     [Fact]
     public void WhenASizeIsGivenThenTheBitmapMatchesIt()
     {

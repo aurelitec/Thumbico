@@ -30,9 +30,8 @@ internal sealed class AppSettings
 /// Writes a colour as an ARGB hex string.
 /// </summary>
 /// <remarks>
-/// System.Text.Json has no built-in converter for Color. Without this it serializes the struct's
-/// read-only surface, reads nothing back, and raises no error, which is how the 2021 build lost the
-/// only value it persisted.
+/// Without this, System.Text.Json serializes the struct's read-only surface, reads nothing back, and
+/// raises no error, so the colour silently fails to persist.
 /// </remarks>
 internal sealed class ColorJsonConverter : JsonConverter<Color>
 {
@@ -54,9 +53,8 @@ internal sealed class ColorJsonConverter : JsonConverter<Color>
 /// Loads and saves the settings file.
 /// </summary>
 /// <remarks>
-/// Portable first: the file sits beside the executable so a portable copy carries its settings with
-/// it. An installed copy lives under Program Files and cannot write there, so that case falls back
-/// to the per-user location rather than failing.
+/// Portable first: the file sits beside the executable so a portable copy carries its settings, and
+/// falls back to the per-user location when that directory cannot be written.
 /// </remarks>
 internal sealed class SettingsStore
 {

@@ -6,10 +6,7 @@ namespace Thumbico;
 /// <summary>
 /// Web addresses the application opens in the browser.
 /// </summary>
-/// <remarks>
-/// Separate from <see cref="Strings"/> because these are navigated to rather than read. A URL that is
-/// shown to the user is display text and belongs there instead.
-/// </remarks>
+/// <remarks>Separate from <see cref="Strings"/>: these are navigated to, not displayed.</remarks>
 internal static class Urls
 {
     internal const string Help = "https://www.aurelitec.com/thumbico/windows/help/";

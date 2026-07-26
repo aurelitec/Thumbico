@@ -20,32 +20,24 @@ internal sealed partial class MainForm
 
     /// <summary>The gap between neighbouring toolbar items, at 100 percent display scale.</summary>
     /// <remarks>
-    /// Worth setting because the framework leaves next to nothing: a button's default margin is zero
-    /// horizontally and a hosted text box or combo gets two raw pixels, so at any scale above 100 the
-    /// items sit flush and the path box and the combo read as one joined box.
+    /// Needed because a button's default horizontal margin is zero and a hosted control's is two raw
+    /// pixels, so above 100 percent the items sit flush and the two fields read as one box.
     /// </remarks>
     private const int ToolbarItemSpacing = 4;
 
     /// <summary>Space each side of a status bar pane's text, at 100 percent display scale.</summary>
-    /// <remarks>
-    /// A pane is given none at all, so its text sits hard against the divider line beside it and one
-    /// pixel from the window edge. This separates both.
-    /// </remarks>
+    /// <remarks>A pane gets none, so its text otherwise touches the divider beside it.</remarks>
     private const int StatusPaneHorizontalPadding = 8;
 
     /// <summary>Space above and below a status bar pane's text, at 100 percent display scale.</summary>
-    /// <remarks>
-    /// Sets the bar's height, which the framework otherwise leaves at 23 logical pixels - noticeably
-    /// tighter than the status bars Windows' own applications draw.
-    /// </remarks>
+    /// <remarks>Sets the bar's height, which the framework leaves tighter than Windows' own.</remarks>
     private const int StatusPaneVerticalPadding = 3;
 
     /// <summary>The standard sizes the combo offers, written as the interface displays them.</summary>
     /// <remarks>
-    /// Every icon size the shell itself uses - 16 through 256 - then doubled twice for the thumbnail
-    /// range. Version 1.5 also listed 36, 72, 160 and 192, which are Windows XP era sizes the shell no
-    /// longer asks for. Each entry has to read exactly as <see cref="ThumbicoSize.Format"/> writes it,
-    /// or picking one would settle the field to a different string than the list shows.
+    /// Every icon size the shell itself uses, then doubled twice for the thumbnail range. Each entry has
+    /// to read exactly as <see cref="ThumbicoSize.Format"/> writes it, or picking one settles the field
+    /// to a different string than the list shows.
     /// </remarks>
     private static readonly string[] StandardSizes =
     [
@@ -76,12 +68,10 @@ internal sealed partial class MainForm
     private ToolStripMenuItem[] _sourceItems = null!;
     private (ToolStripMenuItem Item, ThumbicoOptions Flag)[] _optionItems = null!;
 
-    /// <summary>The two images an item with no icon of its own alternates between.</summary>
+    /// <summary>The tick and the empty box an item with no icon of its own alternates between.</summary>
     /// <remarks>
-    /// One tick and one empty box, shared by every such item rather than built per item or per toggle.
-    /// Both are needed at the full image size: the blank one because a row only takes the image
-    /// column's height if it has an image at all, and the tick because the framework's own check is
-    /// stretched to that column and arrives blurry.
+    /// Shared rather than built per item. The blank one is load bearing: a row only takes the image
+    /// column's height if the item has an image at all.
     /// </remarks>
     private Bitmap _menuCheckImage = null!;
     private Bitmap _menuBlankImage = null!;
@@ -89,25 +79,16 @@ internal sealed partial class MainForm
     /// <summary>
     /// The size toolbar icons are drawn at, taken from the display scale rather than assumed.
     /// </summary>
-    /// <remarks>
-    /// Deliberately larger than the menu's, and larger than the 16 a ToolStrip defaults to, because
-    /// these buttons carry no text at all and the icon is the whole label. Measured against Windows'
-    /// own toolbars, 16 left the sparser glyphs covering noticeably less of their box; the icon set
-    /// does not inset every glyph equally, so raising the box is the only safe way to fill it.
-    /// </remarks>
+    /// <remarks>Larger than the menu's, because these buttons have no text and the icon is the label.</remarks>
     private int ToolbarIconSize => 20 * this.DeviceDpi / 96;
 
     /// <summary>
     /// The box a menu image occupies, taken from the display scale rather than assumed.
     /// </summary>
     /// <remarks>
-    /// This is what sets the row height, because a row is at least as tall as the image column, and it
-    /// is the only lever that opens the rows up while keeping their contents centred. Both documented
-    /// alternatives were tried and measured, and both fail the same way: item Padding, and AutoSize off
-    /// with an explicit Size, each inflate the item without the drop-down recomputing its text
-    /// rectangle, so the text and shortcut end up against the top of the row - by the same offsets to
-    /// the pixel. Was 16, on the reasoning that taller rows were to be avoided; once they became the
-    /// goal that reasoning inverted. Measured, this gives a 26 logical row where 16 gave 18.
+    /// This sets the row height, and is the only lever that does so while keeping a row's contents
+    /// centred: growing the item instead leaves its text against the top, because the drop-down does not
+    /// recompute the text rectangle.
     /// </remarks>
     private int MenuImageSize => 24 * this.DeviceDpi / 96;
 
@@ -115,10 +96,8 @@ internal sealed partial class MainForm
     /// The size a menu glyph is drawn at inside that box, taken from the display scale.
     /// </summary>
     /// <remarks>
-    /// Deliberately smaller than the box, and left at what Windows menus use. Separating the two is
-    /// what buys open rows without oversized icons: the row is as tall as the image column, while the
-    /// ink stays 16 and the surplus is transparent padding. Tying them together made the rows right and
-    /// the icons visibly too large.
+    /// Kept smaller than the box on purpose: the surplus is transparent padding, which is what buys open
+    /// rows without oversized icons.
     /// </remarks>
     private int MenuGlyphSize => 16 * this.DeviceDpi / 96;
 
@@ -126,10 +105,8 @@ internal sealed partial class MainForm
     /// The size a check mark is drawn at inside the image box, taken from the display scale.
     /// </summary>
     /// <remarks>
-    /// Smaller than the icons on purpose, and not because it is larger - measured at a shared size its
-    /// ink is 24.8 by 18.4 against the folder's 27.3 by 22.4, the smallest ink area in the set. The tick
-    /// is a single stroke spanning most of its box while every other glyph here is a closed form, so it
-    /// reads heavier at the same size. Two logical pixels down settles it against the icons above.
+    /// Smaller than the icons because a tick is one stroke among closed forms and reads heavier at the
+    /// same size.
     /// </remarks>
     private int MenuCheckGlyphSize => 14 * this.DeviceDpi / 96;
 
@@ -154,12 +131,9 @@ internal sealed partial class MainForm
     {
         this.SuspendLayout();
 
-        // Scale by display resolution, not by font metrics. Font mode derives its factor from average
-        // character size, which does not grow evenly in both directions, so widths and heights end up
-        // scaled differently - a squeezed toolbar and a window taller than it should be. Dpi mode is
-        // linear by definition, and the documentation recommends it for graphics-based applications
-        // and against Font mode where the absolute size matters. Here it matters: in Fit to window
-        // mode the canvas size is the size asked of the shell. Measurements in gui-design.md.
+        // Dpi rather than Font mode. Font mode's factor comes from average character size, which does
+        // not grow evenly in both directions, so widths and heights end up on different factors. Here
+        // the absolute size matters: in Fit to window mode the canvas size is what is asked of the shell.
         this.AutoScaleDimensions = new SizeF(96F, 96F);
         this.AutoScaleMode = AutoScaleMode.Dpi;
         this.ClientSize = new Size(760, 640);
@@ -181,12 +155,9 @@ internal sealed partial class MainForm
 
         this.BuildMenu();
 
-        // Assigning the menu to the form is what makes its shortcuts work at all. Windows Forms
-        // routes a command key through the focused control's ProcessCmdKey and up its parents, and
-        // each one offers the key to its own ContextMenuStrip; a menu that is only ever Show()n is
-        // in nobody's chain, so every accelerator on it is dead. Putting it on the form rather than
-        // the canvas means the key is caught wherever focus happens to be, and right-clicking gets
-        // handled natively, including the Menu key and Shift+F10.
+        // This is what makes the menu's shortcuts work at all: a command key is offered to each
+        // ContextMenuStrip up the focus chain, so a menu that is only ever Show()n has dead
+        // accelerators. On the form rather than the canvas, so the key is caught wherever focus is.
         this.ContextMenuStrip = this._menu;
 
         this.ResumeLayout(performLayout: true);
@@ -196,8 +167,8 @@ internal sealed partial class MainForm
     /// Builds the single menu that the toolbar button and the canvas right-click both show.
     /// </summary>
     /// <remarks>
-    /// One instance rather than two, because Thumbico has one object and every command acts on it,
-    /// so a context menu scoped to what was clicked would hold the same items anyway.
+    /// One instance, not two: the app has a single object and every command acts on it, so a menu scoped
+    /// to what was clicked would hold the same items.
     /// </remarks>
     private void BuildMenu()
     {
@@ -207,8 +178,7 @@ internal sealed partial class MainForm
 
         ToolStripMenuItem open = this.BuildItem(
             Strings.MenuOpen, Glyphs.Open, Keys.Control | Keys.O, this.OnOpenClicked);
-        // Windows Forms labels a shortcut from the Keys enum, which spells these two "Ctrl+Oemplus"
-        // and "Ctrl+OemMinus". The display string is what the user reads; the key still binds.
+        // The display string is only the label; the key still binds. See Strings for why it is needed.
         ToolStripMenuItem bigger = this.BuildItem(
             Strings.MenuMakeBigger, Glyphs.ZoomIn, Keys.Control | Keys.Oemplus, this.OnMakeBigger);
         bigger.ShortcutKeyDisplayString = Strings.ShortcutMakeBigger;
@@ -284,8 +254,7 @@ internal sealed partial class MainForm
 
         this._menu = new ContextMenuStrip
         {
-            // The box the glyphs are padded out to, which is larger than the glyphs themselves and
-            // larger than the toolbar's. This is what gives the rows their height.
+            // The padded box rather than the glyph size, which is what gives the rows their height.
             ImageScalingSize = new Size(this.MenuImageSize, this.MenuImageSize),
         };
         this._menu.Items.AddRange(
@@ -332,10 +301,8 @@ internal sealed partial class MainForm
 
         if (glyph is null)
         {
-            // No icon of its own, so it shows the tick when checked and an empty box otherwise. Bound
-            // to the item's own event rather than updated at each call site, of which there are nine.
-            // The empty box is not decoration: a row only takes the image column's height if it has an
-            // image at all, so without it this row alone would stay at the tighter text height.
+            // No icon of its own, so it shows the tick when checked and the empty box otherwise. Bound
+            // to the item's event rather than to each of the nine places the check state is set.
             item.CheckedChanged += this.OnMenuItemCheckedChanged;
             item.Image = this._menuBlankImage;
         }
@@ -394,13 +361,10 @@ internal sealed partial class MainForm
         this._sizeBox.LostFocus += this.OnSizeBoxCommitted;
         this._sizeBox.KeyDown += this.OnSizeBoxKeyDown;
 
-        // Give the path box the combo's height so the two read as one pair. A floor rather than an
-        // assigned Height on purpose: assigning Height needs TextBoxBase.AutoSize off, and a
-        // single-line text box then draws its text at the top, having no vertical alignment of its
-        // own. A minimum leaves AutoSize on, so the text stays centred. Height only - the combo's
-        // full Size would also impose its width as a floor, quietly competing with StretchPathBox.
-        // The combo reports its height correctly here, before either has been laid out, because that
-        // height comes from the font.
+        // Give the path box the combo's height so the two read as a pair. A floor, not an assigned
+        // Height: that needs AutoSize off, and a single-line text box then draws its text at the top,
+        // having no vertical alignment. Height only - the full Size would impose a width floor too,
+        // competing with StretchPathBox.
         this._pathBox.TextBox.MinimumSize = new Size(0, this._sizeBox.Height);
 
         this._refreshButton = this.BuildToolButton(
@@ -410,24 +374,19 @@ internal sealed partial class MainForm
 
         this._toolStrip = new ToolStrip
         {
-            // Five fixed items and one that stretches, so there is nothing worth hiding behind a
-            // chevron. Leaving overflow on also loses a race: the strip decides what overflows
-            // before StretchPathBox has shrunk the path box, so narrowing the window swept every
-            // control except Open into the overflow menu.
+            // Off because the strip decides what overflows before StretchPathBox has shrunk the path
+            // box, which swept everything but Open into the chevron as the window narrowed.
             CanOverflow = false,
             GripStyle = ToolStripGripStyle.Hidden,
 
-            // Match the size the glyphs were drawn at, which the 16 the default resolves to would
-            // otherwise shrink them back to.
+            // Match the size the glyphs were drawn at, or the default 16 shrinks them back.
             ImageScalingSize = new Size(this.ToolbarIconSize, this.ToolbarIconSize),
             Padding = new Padding(6, 3, 6, 3),
             RenderMode = ToolStripRenderMode.System,
             TabIndex = 0,
 
-            // Left at the default false on purpose. True means what its documentation says - one Tab
-            // enters the strip, the arrow keys move within it, and the next Tab leaves - which strands
-            // the path box and the size combo, because an arrow key inside a text box moves the caret
-            // rather than moving on. False instead lets Tab step through the items one at a time.
+            // False on purpose. True gives arrow-key navigation within the strip, which strands the two
+            // hosted fields, since an arrow key there moves the caret. False lets Tab step item to item.
             TabStop = false,
         };
         this._toolStrip.Items.AddRange(
@@ -441,18 +400,15 @@ internal sealed partial class MainForm
 
     private void BuildStatusStrip()
     {
-        // Divider on each pane's leading edge, so the group is bounded where it begins rather than
-        // trailing off into the sizing grip.
+        // Divider on each leading edge, so the group is bounded where it begins rather than trailing
+        // off into the sizing grip.
         this._askedLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Left };
         this._returnedLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Left };
         this._kindLabel = new ToolStripStatusLabel { BorderSides = ToolStripStatusLabelBorderSides.Left };
 
-        // The stretching first pane is both what pushes the indicators against the right edge and
-        // where a message goes. Windows' status bar model is a message line first and the indicators
-        // after it, which is the layout this produces. Spring is the StatusStrip's own way to hand one
-        // pane the slack; ToolStripItem.Alignment cannot do it, because a StatusStrip lays out as a
-        // table and a table ignores Alignment. Left aligned explicitly, because a message line is
-        // left aligned by that same convention and it should not depend on the default.
+        // A message line first, indicators after it, which is Windows' own status bar model. Spring is
+        // how a StatusStrip hands one pane the slack; Alignment cannot, because a table layout ignores
+        // it. Alignment set explicitly so it does not rest on a default.
         this._messageLabel = new ToolStripStatusLabel
         {
             Spring = true,
@@ -468,8 +424,8 @@ internal sealed partial class MainForm
             this._kindLabel,
         ]);
 
-        // Scaled by hand, as every item value must be: autoscale reaches a StatusStrip's own padding
-        // but nothing belonging to the items inside it.
+        // Scaled by hand, as every item value must be: autoscale reaches a strip's own padding but
+        // nothing on the items inside it.
         int horizontal = StatusPaneHorizontalPadding * this.DeviceDpi / 96;
         int vertical = StatusPaneVerticalPadding * this.DeviceDpi / 96;
 
@@ -484,11 +440,9 @@ internal sealed partial class MainForm
 
     /// <summary>Separates the toolbar items, which the framework's own margins barely do.</summary>
     /// <remarks>
-    /// The gap goes on the right of each item only, so two neighbours are one spacing apart rather
-    /// than two, and the strip's own padding still owns the outer edges. Each item keeps whatever
-    /// vertical margin its type chose, since that is what positions it in the row, and the last item
-    /// keeps no gap because there is nothing after it to be separated from. Scaled by hand: autoscale
-    /// reaches a ToolStrip's padding but not a ToolStripItem's, which is not a control.
+    /// On the right of each item only, so neighbours sit one gap apart rather than two and the strip's
+    /// padding keeps the outer edges. Each item keeps its own vertical margin, which is what positions
+    /// it in the row.
     /// </remarks>
     private void SpaceToolStripItems()
     {

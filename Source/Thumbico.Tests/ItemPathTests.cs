@@ -5,11 +5,7 @@ namespace Thumbico.Tests;
 
 public class ItemPathTests
 {
-    /// <summary>
-    /// The window title was built with Path.GetFileName alone, which is documented to return empty
-    /// for a path ending in a directory or a volume separator - so a folder with a trailing slash and
-    /// a drive root both produced " - Thumbico". These are the cases that were never enumerated.
-    /// </summary>
+    /// <summary>A name is never empty, whatever separators or roots the path ends in.</summary>
     [Theory]
     [InlineData(@"X:\ToDelete\ShareX_thumbico.png", "ShareX_thumbico.png")]
     [InlineData(@"C:\Foo", "Foo")]
@@ -36,8 +32,8 @@ public class ItemPathTests
     }
 
     /// <summary>
-    /// Pins the 2018 defect: taking the format from the filter index alone writes BMP bytes into a
-    /// file the user named .png. The first case is the one that gets it wrong.
+    /// Taking the format from the filter index alone writes BMP bytes into a file named .png. The first
+    /// case is the one that gets it wrong.
     /// </summary>
     [Theory]
     [InlineData("thumb.png", 2, ThumbicoFormat.Png)]

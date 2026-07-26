@@ -31,8 +31,7 @@ internal static class ShellImage
         SIIGBF flags = ToNativeFlags(options);
         Bitmap bitmap;
 
-        // Auto asks for a real thumbnail first so callers get the richest image available, and
-        // falls back to the icon for the many items that have no thumbnail at all.
+        // Auto tries a thumbnail first, then falls back to the icon for items that have none.
         if (source == ThumbicoSource.Auto)
         {
             if (TryGetBitmap(factory, requested, flags | SIIGBF.SIIGBF_THUMBNAILONLY, out Bitmap? thumbnail))
@@ -53,8 +52,8 @@ internal static class ShellImage
             bitmap = GetBitmap(factory, requested, flags | sourceFlag);
         }
 
-        // Icons come back bottom-up and thumbnails top-down, while the DIB header reports a
-        // positive height for both. Which kind was returned is the only thing that tells them apart.
+        // Icons come back bottom-up and thumbnails top-down, while the DIB header reports a positive
+        // height for both - so the kind returned is the only signal that distinguishes them.
         if (isIcon)
         {
             bitmap.RotateFlip(RotateFlipType.RotateNoneFlipY);
@@ -94,8 +93,8 @@ internal static class ShellImage
     /// Copies a native bitmap into a managed one that owns its pixels, preserving transparency.
     /// </summary>
     /// <remarks>
-    /// The obvious route, Image.FromHbitmap, is documented not to preserve the alpha channel, which
-    /// icons depend on. Reading the DIB section directly is the way to keep it.
+    /// Image.FromHbitmap is documented not to preserve the alpha channel, which icons depend on, so the
+    /// DIB section is read directly instead.
     /// </remarks>
     private static unsafe Bitmap ToManagedBitmap(DeleteObjectSafeHandle hbitmap)
     {
@@ -103,23 +102,22 @@ internal static class ShellImage
         Span<byte> buffer = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref info, 1));
         int copied = PInvoke.GetObject(hbitmap, buffer);
 
-        // Anything that is not 32 bits per pixel has no alpha channel worth preserving, and its rows
-        // would not match the stride the wrapper below assumes.
+        // Below 32 bits per pixel there is no alpha to preserve, and the stride assumed below would not
+        // match the rows.
         if (copied < buffer.Length || info.bmBitsPixel != 32)
         {
             return Image.FromHbitmap(hbitmap.DangerousGetHandle());
         }
 
-        // The first bitmap borrows the shell's pixels, the second owns them. The copy is what makes
-        // the result outlive the native bitmap, which the caller frees as soon as this returns.
+        // The first borrows the shell's pixels, the second owns them - which is what lets the result
+        // outlive the native bitmap the caller frees on return.
         using Bitmap borrowed = new(
             info.bmWidth, info.bmHeight, info.bmWidthBytes, PixelFormat.Format32bppArgb, (nint)info.bmBits);
 
         Bitmap owned = new(info.bmWidth, info.bmHeight, PixelFormat.Format32bppArgb);
         using (Graphics graphics = Graphics.FromImage(owned))
         {
-            // Take the pixels as they are. The default mode would blend them into the transparent
-            // canvas and quietly alter the alpha.
+            // SourceCopy, or the default blends into the transparent canvas and alters the alpha.
             graphics.CompositingMode = CompositingMode.SourceCopy;
             graphics.DrawImageUnscaled(borrowed, 0, 0);
         }

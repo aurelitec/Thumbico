@@ -11,9 +11,9 @@ namespace Thumbico;
 /// The bundled icon font and the code points the interface draws from it.
 /// </summary>
 /// <remarks>
-/// A subset of Microsoft's Fluent UI System Icons, embedded rather than looked up by family name so
-/// that there is no font for a machine to be missing. Each constant records the upstream icon name,
-/// which is what regenerating the subset needs; see THIRD-PARTY-NOTICES.md.
+/// A subset of Microsoft's Fluent UI System Icons, embedded so no machine can be missing it. Each
+/// constant records the upstream icon name, which regenerating the subset needs; see
+/// THIRD-PARTY-NOTICES.md.
 /// </remarks>
 internal static class Glyphs
 {
@@ -37,12 +37,7 @@ internal static class Glyphs
     internal const string About = "\uEA88";          // info
 
     /// <summary>The tick a checked menu item shows, drawn as that item's icon.</summary>
-    /// <remarks>
-    /// Ours rather than the framework's, because the framework stretches its own check bitmap to fill
-    /// whatever the image column is, and this menu's column is wider than that bitmap was drawn for.
-    /// Supplying the tick as an ordinary icon puts it in the one column, at the one size, alongside
-    /// every other glyph here.
-    /// </remarks>
+    /// <remarks>Ours because the framework stretches its own check to fill a widened image column.</remarks>
     internal const string Checkmark = "\uE460";      // checkmark
 
     private const string ResourceName = "Thumbico.Assets.Thumbico.Icons.ttf";
@@ -72,10 +67,8 @@ internal static class Glyphs
     /// sit on, so the icon follows the light or dark theme.</param>
     /// <returns>A new bitmap that the caller owns.</returns>
     /// <remarks>
-    /// Drawn as an outline rather than as text, because centring text centres the line box and this
-    /// font's line box is taller than its em with no descent to balance it - which left every glyph
-    /// sitting high, by a different amount for each. An outline can be asked where its own ink is.
-    /// Filling geometry also avoids the question of which text paths can see a memory font.
+    /// Filled as an outline rather than drawn as text, because this font's line box does not match its
+    /// ink and centring text would centre the box. An outline can be asked where its ink is.
     /// </remarks>
     internal static Bitmap Render(string glyph, int size, int box, Color color)
     {
@@ -114,9 +107,8 @@ internal static class Glyphs
         byte[] font = new byte[stream.Length];
         stream.ReadExactly(font);
 
-        // Whether GDI+ copies this buffer or keeps reading it is not documented either way, so it is
-        // allocated once and never freed. The cost of the precaution is four kilobytes for the
-        // lifetime of the process; the cost of being wrong is a font that decodes to garbage.
+        // Never freed: whether GDI+ keeps reading this buffer is undocumented, and four kilobytes for
+        // the process lifetime is cheaper than a font that decodes to garbage.
         IntPtr buffer = Marshal.AllocCoTaskMem(font.Length);
         Marshal.Copy(font, 0, buffer, font.Length);
 

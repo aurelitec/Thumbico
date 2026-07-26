@@ -9,16 +9,10 @@ namespace Thumbico;
 /// <summary>
 /// Converts between a size and the text a user types for it.
 /// </summary>
-/// <remarks>
-/// Shared by every frontend so that a size typed into the window and a size passed on a command line
-/// are read the same way.
-/// </remarks>
+/// <remarks>Shared by every frontend, so a typed size and a command-line size read the same.</remarks>
 public static class ThumbicoSize
 {
-    /// <summary>
-    /// The largest dimension accepted, which is the limit version 1.5 enforced. Its size spinners
-    /// could not be overtyped, so the limit needed no check; free text does.
-    /// </summary>
+    /// <summary>The largest dimension accepted.</summary>
     public const int MaximumDimension = 5000;
 
     /// <summary>
@@ -69,8 +63,8 @@ public static class ThumbicoSize
         => string.Create(CultureInfo.InvariantCulture, $"{size.Width} x {size.Height}");
 
     /// <summary>
-    /// Reads one dimension. NumberStyles.None is what rejects signs, decimal points, and group
-    /// separators, so only bare digits survive.
+    /// Reads one dimension. NumberStyles.None is what rejects signs, decimal points and group
+    /// separators, leaving only bare digits.
     /// </summary>
     private static bool TryParseDimension(ReadOnlySpan<char> text, out int value)
         => int.TryParse(text.Trim(), NumberStyles.None, CultureInfo.InvariantCulture, out value)

@@ -16,10 +16,9 @@ internal sealed partial class MainForm : Form
     private const int MinimumRequest = 16;
 
     /// <summary>
-    /// What Make Bigger multiplies the request by, and Make Smaller divides it by. A factor rather
-    /// than the flat 20 pixels of 1.0 and 1.5, because those versions overwrote the size box with
-    /// the size the shell returned; here the box holds the request, so a fixed step applied to a
-    /// number the shell is already ignoring would often produce no visible change at all.
+    /// What Make Bigger multiplies the request by, and Make Smaller divides it by. A factor rather than
+    /// a fixed step, since the shell often returns something smaller than asked and a fixed step
+    /// against an ignored number can produce no visible change.
     /// </summary>
     private const double SizeStep = 1.25;
 
@@ -43,8 +42,7 @@ internal sealed partial class MainForm : Form
     {
         this.BuildLayout();
 
-        // ApplySettings sets the size combo itself, so the default selection is not set separately;
-        // doing both would ask the shell twice on startup.
+        // ApplySettings sets the size combo itself; setting a default as well asks the shell twice.
         this._settings = this._store.Load();
         this.ApplySettings();
         this._initialPath = initialPath;
@@ -58,16 +56,12 @@ internal sealed partial class MainForm : Form
         Math.Max(this._canvas.ClientSize.Height, MinimumRequest));
 
     /// <summary>
-    /// Keeps the window inside the screen it opens on, then renders anything passed on the command
-    /// line.
+    /// Keeps the window inside the screen it opens on, then renders anything passed on the command line.
     /// </summary>
     /// <remarks>
-    /// The design size is written at 100 percent scale, so on a sufficiently scaled display it can
-    /// exceed the work area and hang the status bar off the bottom of the desktop. Scaling by DPI
-    /// makes that far less likely than the font scaling this once compensated for, but the ceiling is
-    /// the screen rather than the scale factor, so the clamp stays. Both it and the first render
-    /// belong here rather than in the constructor, because scaling has not been applied while that
-    /// runs and Fit to window would size the first request against a canvas that is about to change.
+    /// The design size is written at 100 percent scale, so a scaled display can push it past the work
+    /// area. Neither step can move to the constructor: scaling has not run yet there, so Fit to window
+    /// would measure a canvas that is about to change size.
     /// </remarks>
     protected override void OnLoad(EventArgs e)
     {
@@ -95,11 +89,9 @@ internal sealed partial class MainForm : Form
     /// Puts the caret in the path box, which is what makes the Tab key work at all.
     /// </summary>
     /// <remarks>
-    /// The toolbar is the only thing Tab visits, and a ToolStrip whose TabStop is off cannot be
-    /// entered by Tab, so focus has to begin inside it. It also has to begin on one of the two hosted
-    /// controls rather than on a button: seeded on a button, Tab does not move at all, which is the
-    /// framework's own open accessibility bug, dotnet/winforms#5794. Measured both ways. This belongs
-    /// here rather than in OnLoad because the window has to be on screen for the focus to stick.
+    /// A ToolStrip with TabStop off cannot be entered by Tab, so focus has to start inside it - and on
+    /// a hosted control, since seeding a button leaves Tab dead (dotnet/winforms#5794). Not in OnLoad:
+    /// the window must be on screen for the focus to stick.
     /// </remarks>
     protected override void OnShown(EventArgs e)
     {
@@ -112,10 +104,8 @@ internal sealed partial class MainForm : Form
     /// Asks the shell again once the display scale changes, because the canvas has a new pixel size.
     /// </summary>
     /// <remarks>
-    /// Only the request is refreshed. Rebuilding the chrome for a new scale is deliberately not
-    /// attempted; see the display scale section of gui-design.md for what the framework gets wrong
-    /// and why the interface is documented as needing a restart instead. Without this the request
-    /// stays at the old canvas size, because the framework's own resize does not raise OnResizeEnd.
+    /// Needed because the framework's own resize does not raise OnResizeEnd. Rebuilding the chrome for
+    /// the new scale is deliberately not attempted; a scale change needs a restart.
     /// </remarks>
     protected override void OnDpiChanged(DpiChangedEventArgs e)
     {
@@ -160,8 +150,8 @@ internal sealed partial class MainForm : Form
     }
 
     /// <summary>
-    /// F5 reloads, as it did in 1.0 and 1.5. Refresh has no menu item to carry a shortcut, so the
-    /// form takes the key itself.
+    /// F5 reloads and Escape leaves Naked Mode. Neither command has a menu item to carry a shortcut,
+    /// so the form takes both keys itself.
     /// </summary>
     protected override void OnKeyDown(KeyEventArgs e)
     {
@@ -183,8 +173,8 @@ internal sealed partial class MainForm : Form
     /// Asks the shell, replays the adjustments, and repaints.
     /// </summary>
     /// <remarks>
-    /// Adjustments are replayed rather than accumulated, so changing the size or the source keeps a
-    /// rotation the user already applied. The 2018 and 2021 builds discarded it here.
+    /// Adjustments are replayed rather than accumulated, so a rotation the user applied survives a
+    /// change of size or source.
     /// </remarks>
     private void Render()
     {
@@ -193,8 +183,7 @@ internal sealed partial class MainForm : Form
             return;
         }
 
-        // There is an item in play now, so the bar reports the shell transaction rather than the
-        // prompt - including when the render below fails, since an error is about that transaction.
+        // An item is in play, so the bar reports the transaction from here on, failure included.
         this.SetStatusMessage(null);
 
         Size asked = this.RequestedSize;
@@ -211,14 +200,13 @@ internal sealed partial class MainForm : Form
             return;
         }
 
-        // Read the shell's answer before the adjustments touch it. The status bar reports the shell
-        // transaction, and a rotation would otherwise be shown as though the shell had returned the
-        // swapped dimensions.
+        // Read before the adjustments touch it, or a rotation reads as though the shell had returned
+        // the swapped dimensions.
         Size returned = loaded.Size;
         this.ApplyAdjustments(loaded);
 
-        // Hand the canvas the new bitmap before releasing the old one, so it is never holding a
-        // reference to something already disposed.
+        // Hand over the new bitmap before releasing the old one, so the canvas never holds a disposed
+        // reference.
         ThumbicoImage? previous = this._thumbico;
         this._thumbico = loaded;
         this._canvas.Image = loaded.Bitmap;
@@ -257,22 +245,9 @@ internal sealed partial class MainForm : Form
     }
 
     /// <summary>
-    /// Shows one message across the whole bar, or hands the bar back to its three indicators.
+    /// Shows one message across the whole bar, or hands it back to the three indicators.
     /// </summary>
-    /// <remarks>
-    /// The flat form is what a Delphi status bar called a simple panel, and what Windows Forms' own
-    /// StatusBar had as ShowPanels before that control was retired - `StatusStrip` has no equivalent
-    /// property. It needs none: the first pane springs, so filling it and hiding the indicators takes
-    /// their dividers with them and leaves a bar with no sections at all.
-    ///
-    /// It also stops the bar collapsing. A pane takes its height from its text, so with every pane
-    /// empty before the first render the bar sat visibly squashed; now one side or the other always has
-    /// text. The two states are still a few pixels apart, which is accepted - see the backlog.
-    ///
-    /// Visible rather than Available on the indicators, though either would do: setting one sets the
-    /// other, and Available is what governs whether an item is placed on the strip at all, so hiding
-    /// really does take each divider with it rather than leaving an empty cell.
-    /// </remarks>
+    /// <remarks>Hiding an indicator takes its divider with it, so a message leaves no sections.</remarks>
     private void SetStatusMessage(string? message)
     {
         this._messageLabel.Text = message ?? string.Empty;
@@ -284,8 +259,8 @@ internal sealed partial class MainForm : Form
     }
 
     /// <summary>
-    /// Reports a failure in the status bar. A modal dialog is the wrong weight for a live preview,
-    /// where "this item has no thumbnail" is an ordinary answer.
+    /// Reports a failure in the status bar rather than a dialog, since "this item has no thumbnail" is
+    /// an ordinary answer for a live preview.
     /// </summary>
     private void ReportFailure(Size asked, Exception error)
     {
@@ -300,8 +275,8 @@ internal sealed partial class MainForm : Form
     }
 
     /// <summary>
-    /// Restores what the user chose last time. The window bounds are only honoured when they still
-    /// land on a connected screen, so a monitor that has gone away cannot hide the window.
+    /// Restores what the user chose last time. Saved bounds are honoured only if they still land on a
+    /// connected screen, so a monitor that has gone away cannot hide the window.
     /// </summary>
     private void ApplySettings()
     {
@@ -317,8 +292,7 @@ internal sealed partial class MainForm : Form
             this.WindowState = FormWindowState.Maximized;
         }
 
-        // Color.Empty is what the converter yields for text it cannot read, and an empty colour is
-        // not a colour the user ever chose, so it falls back to the checkerboard like a missing one.
+        // Color.Empty is what the converter yields for unreadable text, so it means no choice at all.
         if (this._settings.BackgroundColor is Color background && background != Color.Empty)
         {
             this._canvas.SolidBackground = background;
@@ -407,21 +381,18 @@ internal sealed partial class MainForm : Form
     }
 
     /// <summary>
-    /// Reads the combo and settles the field to the one size format the rest of the interface uses.
+    /// Reads the combo and settles the field to the one size format the interface uses everywhere.
     /// </summary>
     /// <remarks>
-    /// Every route out settles the text, so the field reads the same whether a size was picked from
-    /// the list, typed, stepped, or restored from settings. It used to be rewritten only when parsing
-    /// failed, which left the shape an accident of how the value arrived while the status bar always
-    /// spelled it out. Unparseable text falls back to the last good value rather than raising an
-    /// error, because this is a live control and not a submitted form.
+    /// Every route out settles the text, so the field reads the same however the size arrived.
+    /// Unparseable text reverts to the last good value rather than raising an error, this being a live
+    /// control and not a submitted form.
     /// </remarks>
     private void CommitSizeText()
     {
-        // Settling the field assigns Text, and when that value matches a list entry the combo selects
-        // it and raises SelectedIndexChanged, which lands back here. Documented: SelectedIndexChanged
-        // fires for a programmatic change as readily as a user one. Unguarded, typing a size that
-        // settles onto a listed one asks the shell twice.
+        // Settling assigns Text, which selects a matching list entry and so raises
+        // SelectedIndexChanged - documented to fire for programmatic changes too - landing back here.
+        // Unguarded, a typed size that settles onto a listed one asks the shell twice.
         if (this._settlingSizeText)
         {
             return;
@@ -547,9 +518,8 @@ internal sealed partial class MainForm : Form
     /// bitmap for applications that only read the legacy format.
     /// </summary>
     /// <remarks>
-    /// The bitmap copy is flattened onto an opaque background first. Handing a transparent bitmap
-    /// straight to SetImage does not merely lose the alpha, it corrupts the colours, because the
-    /// clipboard converts it through a screen-compatible device bitmap.
+    /// The bitmap copy must be flattened first: SetImage routes a transparent bitmap through a
+    /// screen-compatible device bitmap, which corrupts the colours rather than merely dropping alpha.
     /// </remarks>
     private void OnCopy(object? sender, EventArgs e)
     {
@@ -635,10 +605,9 @@ internal sealed partial class MainForm : Form
     /// Strips the window down to the image, keeping the title bar so it can still be moved.
     /// </summary>
     /// <remarks>
-    /// The 1.0 and 1.5 shape, restored: hide the toolbar, the window buttons and the scrollbars, and
-    /// leave the window exactly where it is. It never maximized and never went borderless - those
-    /// were 2018's Fullscreen and 2021's Preview Mode, neither of which shipped. A window that stays
-    /// a window can be put beside the thing you are comparing an icon against, which is the point.
+    /// Hides the toolbar, the status bar, the window buttons and the scrollbars, and leaves the window
+    /// where it is. Deliberately not maximized or borderless: a window that stays a window can be put
+    /// beside whatever you are comparing an icon against.
     /// </remarks>
     private void OnNakedMode(object? sender, EventArgs e) => this.SetNakedMode(!this._nakedMode);
 
@@ -651,8 +620,8 @@ internal sealed partial class MainForm : Form
         this.ControlBox = !naked;
         this._canvas.AutoScroll = !naked;
 
-        // The canvas has just grown into the space the chrome vacated, so the request has changed.
-        // Layout runs synchronously here, so the new client size is already the one to measure.
+        // The canvas has taken the space the chrome vacated, and layout ran synchronously above, so the
+        // new client size is already the one to ask for.
         if (this._fixedSize is null)
         {
             this.Render();

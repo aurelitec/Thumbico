@@ -11,10 +11,7 @@ namespace Thumbico.Tests;
 /// </summary>
 public class StringsTests
 {
-    /// <summary>
-    /// The About box is laid out by its line breaks, so writing this as a verbatim string would
-    /// collapse it to one line and print the escapes instead.
-    /// </summary>
+    /// <summary>The About box is laid out by its line breaks, which a verbatim string would print.</summary>
     [Fact]
     public void WhenTheAboutTextIsFormattedThenItHasThreeLines()
     {
@@ -24,9 +21,8 @@ public class StringsTests
     }
 
     /// <summary>
-    /// The filters are pipe separated, and a miscount silently produces a broken dialog rather than
-    /// an error. The save filter's five pairs also have to stay in step with the format list that the
-    /// save handler indexes by filter position.
+    /// A miscounted pipe gives a broken dialog rather than an error, and the five pairs must stay in
+    /// step with the format list the save handler indexes by position.
     /// </summary>
     [Fact]
     public void WhenTheSaveFilterIsReadThenItHasFivePairs()

@@ -8,8 +8,8 @@ namespace Thumbico.Tests;
 public class AppSettingsTests
 {
     /// <summary>
-    /// The 2021 build lost this value on every restart without raising an error. This test is the
-    /// reason the converter exists; if it ever fails, the colour is silently not being saved.
+    /// The reason the colour converter exists. If this fails, the colour is silently not being saved,
+    /// because a failed round trip raises no error of its own.
     /// </summary>
     [Fact]
     public void WhenBackgroundColorIsSavedThenItSurvivesTheRoundTrip()

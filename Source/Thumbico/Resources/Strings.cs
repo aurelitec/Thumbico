@@ -6,12 +6,7 @@ namespace Thumbico;
 /// <summary>
 /// The user-facing text of the interface.
 /// </summary>
-/// <remarks>
-/// Plain constants rather than a resx. Localization is not planned, and the resx route cost build
-/// machinery that the language server could not see, so every call site showed as an error while the
-/// build stayed green. Text that is never displayed does not belong here; a URL that is only ever
-/// navigated to lives in <see cref="Urls"/>.
-/// </remarks>
+/// <remarks>Text that is never displayed does not belong here; see <see cref="Urls"/>.</remarks>
 internal static class Strings
 {
     internal const string AppName = "Thumbico";
@@ -58,17 +53,11 @@ internal static class Strings
     internal const string MenuOnlineHelp = "Online &Help";
     internal const string MenuAbout = "&About Thumbico";
 
-    /// <summary>
-    /// Written out rather than taken from the Keys enum, which spells these two "Ctrl+Oemplus" and
-    /// "Ctrl+OemMinus".
-    /// </summary>
+    /// <summary>Written out because the Keys enum spells these "Ctrl+Oemplus" and "Ctrl+OemMinus".</summary>
     internal const string ShortcutMakeBigger = "Ctrl++";
     internal const string ShortcutMakeSmaller = "Ctrl+-";
 
-    /// <summary>
-    /// The save filter's pairs are in the same order as the formats the save handler chooses from.
-    /// The two lists are only correct while they agree.
-    /// </summary>
+    /// <summary>Pairs in the same order as the save handler's formats; only correct while they agree.</summary>
     internal const string SaveDialogFilter = "PNG image (*.png)|*.png|BMP image (*.bmp)|*.bmp|"
         + "GIF image (*.gif)|*.gif|JPEG image (*.jpg)|*.jpg|TIFF image (*.tif)|*.tif";
 

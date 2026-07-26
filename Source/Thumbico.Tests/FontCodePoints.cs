@@ -9,15 +9,12 @@ namespace Thumbico.Tests;
 /// Reads the set of characters a TrueType font actually maps.
 /// </summary>
 /// <remarks>
-/// Rendering cannot answer this question. A code point the font lacks is not reported: GDI+ either
-/// draws nothing or silently substitutes another font's glyph, depending only on whether Windows
-/// happens to ship a font covering that range. Both outcomes look like success. Reading the
-/// character map is the only way to distinguish a glyph the bundled font supplies from one Windows
-/// supplied on its behalf, and that distinction is the whole point of bundling the font.
+/// Rendering cannot answer this: a missing code point either draws nothing or is silently substituted
+/// from another font, and both look like success. Reading the character map is the only way to tell a
+/// glyph the bundled font supplies from one Windows supplied for it.
 ///
-/// Only cmap format 4 is handled, which is what the committed subset uses and what fontTools emits
-/// for a Basic Multilingual Plane font. A font using any other format throws rather than silently
-/// reporting an empty set.
+/// Only cmap format 4 is handled, which is what the committed subset uses. Any other format throws
+/// rather than quietly reporting an empty set.
 /// </remarks>
 internal static class FontCodePoints
 {
@@ -95,8 +92,7 @@ internal static class FontCodePoints
                     ? (code + delta) & 0xFFFF
                     : ReadGlyphFromArray(table, rangeOffsetAt, rangeOffset, code, start, delta);
 
-                // Glyph 0 is .notdef, which means the segment covers the code point without
-                // supplying a shape for it.
+                // Glyph 0 is .notdef: the segment covers the code point but supplies no shape.
                 if (glyph != 0)
                 {
                     mapped.Add(code);

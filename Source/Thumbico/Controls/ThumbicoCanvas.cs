@@ -10,12 +10,8 @@ namespace Thumbico;
 /// Shows the rendered thumbico at its true size, scrolling rather than scaling when it does not fit.
 /// </summary>
 /// <remarks>
-/// Scaling for display was rejected deliberately: the product exists to show what the shell produced
-/// at a requested size, and a resampled preview is a picture of the resampling instead.
-///
-/// It also takes no focus, which is equally deliberate. A Panel is neither selectable nor a tab stop,
-/// and leaving it that way makes the toolbar the only thing the Tab key ever visits. The cost is that
-/// scrolling is by wheel and scrollbar rather than by arrow key.
+/// One image pixel to one screen pixel is the point of the control, so it must never scale to fit. It
+/// is also deliberately not a tab stop, which keeps the Tab key inside the toolbar.
 /// </remarks>
 internal sealed class ThumbicoCanvas : Panel
 {
@@ -34,11 +30,7 @@ internal sealed class ThumbicoCanvas : Panel
     }
 
     /// <summary>Gets or sets the image to show. The canvas does not own it.</summary>
-    /// <remarks>
-    /// Hidden from designer serialization, as every property below is. Both hold live state that is
-    /// rebuilt on each render, so there is nothing a designer could meaningfully persist. Analyzer
-    /// WFO1000 requires the intent to be stated rather than left to the default.
-    /// </remarks>
+    /// <remarks>Live state, so nothing to serialize; analyzer WFO1000 wants that stated either way.</remarks>
     [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
     internal Bitmap? Image
     {
@@ -64,8 +56,8 @@ internal sealed class ThumbicoCanvas : Panel
     }
 
     /// <summary>
-    /// Rebuilds the checkerboard when the system switches between light and dark. Only SystemColors
-    /// values follow the theme on their own, and none of this backdrop uses them.
+    /// Rebuilds the checkerboard on a light or dark switch, since its colours are ours rather than
+    /// SystemColors and so do not follow the theme by themselves.
     /// </summary>
     protected override void OnSystemColorsChanged(EventArgs e)
     {
@@ -89,9 +81,6 @@ internal sealed class ThumbicoCanvas : Panel
     {
         this.PaintBackdrop(e.Graphics);
 
-        // Nothing to draw over the backdrop until an item is rendered. The prompt that used to sit
-        // here moved to the status bar, where it is drawn in chrome colours and so stays legible
-        // whatever backdrop colour the user picks - grey on a mid-grey backdrop was invisible.
         if (this._image is null)
         {
             return;
@@ -136,8 +125,7 @@ internal sealed class ThumbicoCanvas : Panel
     }
 
     /// <summary>
-    /// Builds the pattern that makes transparent areas of an icon visible, in the current theme and
-    /// at the current display scale.
+    /// Builds the pattern that makes an icon's transparency visible, for the current theme and scale.
     /// </summary>
     private TextureBrush CreateCheckerboard()
     {
@@ -145,8 +133,7 @@ internal sealed class ThumbicoCanvas : Panel
         Color light = dark ? Color.FromArgb(56, 56, 56) : Color.FromArgb(250, 250, 250);
         Color shade = dark ? Color.FromArgb(40, 40, 40) : Color.FromArgb(226, 226, 226);
 
-        // Derive the tile from its half so it cannot come out odd, which would leave a seam where
-        // the two shaded quarters fail to meet the tile edge.
+        // Sized from the half so the tile cannot come out odd and leave a seam.
         int half = TileSize * this.DeviceDpi / 96 / 2;
         int tile = half * 2;
 
