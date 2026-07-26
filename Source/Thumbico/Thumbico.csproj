@@ -20,12 +20,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
 
     <!--
-      Per-monitor v2 rather than the SystemAware default. Windows bitmap-stretches a system-aware
-      window on any display whose scale differs from the primary one, which for a product that
-      exists to show one image pixel per screen pixel would mean lying about the pixels. Per-monitor
-      v2 is never bitmap-scaled and sees each display's raw pixels. The accepted cost is that a scale
-      change while the window is open leaves the chrome wrong until a restart, because the framework
-      mis-rescales ToolStrip and StatusStrip; see the display scale section of work/docs/gui-design.md.
+      Not the SystemAware default: Windows bitmap-stretches a system-aware window on a display at a
+      different scale, and this product exists to show one image pixel per screen pixel. The cost is
+      chrome left wrong until a restart on a live scale change (dotnet/winforms#14449).
     -->
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
   </PropertyGroup>
