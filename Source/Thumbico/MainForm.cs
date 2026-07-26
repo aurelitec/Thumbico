@@ -50,6 +50,7 @@ internal sealed partial class MainForm : Form
     private bool _flipVertical;
     private bool _grayscale;
     private bool _nakedMode;
+    private bool _settlingSizeText;
 
     internal MainForm(string? initialPath)
     {
@@ -388,16 +389,32 @@ internal sealed partial class MainForm : Form
     }
 
     /// <summary>
-    /// Reads the combo. Unparseable text falls back to the last good value rather than raising an
-    /// error, because this is a live control and not a submitted form.
+    /// Reads the combo and settles the field to the one size format the rest of the interface uses.
     /// </summary>
+    /// <remarks>
+    /// Every route out settles the text, so the field reads the same whether a size was picked from
+    /// the list, typed, stepped, or restored from settings. It used to be rewritten only when parsing
+    /// failed, which left the shape an accident of how the value arrived while the status bar always
+    /// spelled it out. Unparseable text falls back to the last good value rather than raising an
+    /// error, because this is a live control and not a submitted form.
+    /// </remarks>
     private void CommitSizeText()
     {
+        // Settling the field assigns Text, and when that value matches a list entry the combo selects
+        // it and raises SelectedIndexChanged, which lands back here. Documented: SelectedIndexChanged
+        // fires for a programmatic change as readily as a user one. Unguarded, typing a size that
+        // settles onto a listed one asks the shell twice.
+        if (this._settlingSizeText)
+        {
+            return;
+        }
+
         string text = this._sizeBox.Text.Trim();
 
         if (string.Equals(text, Strings.FitToWindow, StringComparison.CurrentCultureIgnoreCase))
         {
             this._fixedSize = null;
+            this.SettleSizeText(Strings.FitToWindow);
             this.Render();
 
             return;
@@ -406,14 +423,23 @@ internal sealed partial class MainForm : Form
         if (ThumbicoSize.TryParse(text, out Size parsed))
         {
             this._fixedSize = parsed;
+            this.SettleSizeText(ThumbicoSize.Format(parsed));
             this.Render();
 
             return;
         }
 
-        this._sizeBox.Text = this._fixedSize is Size current
+        this.SettleSizeText(this._fixedSize is Size current
             ? ThumbicoSize.Format(current)
-            : Strings.FitToWindow;
+            : Strings.FitToWindow);
+    }
+
+    /// <summary>Writes the field without the write coming back as a fresh commit.</summary>
+    private void SettleSizeText(string text)
+    {
+        this._settlingSizeText = true;
+        this._sizeBox.Text = text;
+        this._settlingSizeText = false;
     }
 
     private void OnMakeBigger(object? sender, EventArgs e) => this.StepSize(SizeStep);
@@ -430,7 +456,7 @@ internal sealed partial class MainForm : Form
         int height = Math.Clamp((int)Math.Round(current.Height * factor), 1, ThumbicoSize.MaximumDimension);
 
         this._fixedSize = new Size(width, height);
-        this._sizeBox.Text = ThumbicoSize.Format(this._fixedSize.Value);
+        this.SettleSizeText(ThumbicoSize.Format(this._fixedSize.Value));
         this.Render();
     }
 

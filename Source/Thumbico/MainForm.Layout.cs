@@ -40,8 +40,18 @@ internal sealed partial class MainForm
     /// </remarks>
     private const int StatusPaneVerticalPadding = 3;
 
+    /// <summary>The standard sizes the combo offers, written as the interface displays them.</summary>
+    /// <remarks>
+    /// Every icon size the shell itself uses - 16 through 256 - then doubled twice for the thumbnail
+    /// range. Version 1.5 also listed 36, 72, 160 and 192, which are Windows XP era sizes the shell no
+    /// longer asks for. Each entry has to read exactly as <see cref="ThumbicoSize.Format"/> writes it,
+    /// or picking one would settle the field to a different string than the list shows.
+    /// </remarks>
     private static readonly string[] StandardSizes =
-        ["16", "32", "48", "64", "128", "256", "512", "1024"];
+    [
+        "16 x 16", "24 x 24", "32 x 32", "48 x 48", "64 x 64", "96 x 96",
+        "128 x 128", "256 x 256", "512 x 512", "1024 x 1024", "2048 x 2048",
+    ];
 
     private ToolStrip _toolStrip = null!;
     private ToolStripButton _openButton = null!;
@@ -377,10 +387,7 @@ internal sealed partial class MainForm
             Width = 110,
         };
         this._sizeBox.Items.Add(Strings.FitToWindow);
-        foreach (string size in StandardSizes)
-        {
-            this._sizeBox.Items.Add(size);
-        }
+        this._sizeBox.Items.AddRange(StandardSizes);
 
         this._sizeBox.SelectedIndexChanged += this.OnSizeBoxCommitted;
         this._sizeBox.LostFocus += this.OnSizeBoxCommitted;
