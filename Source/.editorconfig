@@ -11,6 +11,12 @@ csharp_using_directive_placement = outside_namespace:suggestion
 dotnet_sort_system_directives_first = true
 dotnet_separate_import_directive_groups = true
 
+# One namespace per project, whatever folder a file sits in. The folders group files for the reader;
+# mirroring them in namespaces would add using directives across a single small assembly for nothing.
+# Without this, IDE0130 fires on every file in a subfolder and the style gate, which runs at
+# --severity info, reports it.
+dotnet_style_namespace_match_folder = false
+
 # internal and private fields should be _camelCase
 dotnet_naming_rule.camel_case_for_private_internal_fields.severity = suggestion
 dotnet_naming_rule.camel_case_for_private_internal_fields.symbols  = private_internal_fields

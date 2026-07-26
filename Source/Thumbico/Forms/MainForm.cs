@@ -23,19 +23,6 @@ internal sealed partial class MainForm : Form
     /// </summary>
     private const double SizeStep = 1.25;
 
-    /// <summary>
-    /// The save formats, in the same order as the pairs in the dialog filter. The two lists are
-    /// only correct while they agree, which is what the 2018 build got wrong.
-    /// </summary>
-    private static readonly ThumbicoFormat[] SaveFormats =
-    [
-        ThumbicoFormat.Png,
-        ThumbicoFormat.Bmp,
-        ThumbicoFormat.Gif,
-        ThumbicoFormat.Jpeg,
-        ThumbicoFormat.Tiff,
-    ];
-
     private readonly SettingsStore _store = SettingsStore.CreateDefault();
     private readonly AppSettings _settings;
     private readonly string? _initialPath;
@@ -343,7 +330,7 @@ internal sealed partial class MainForm : Form
     {
         this._path = path;
         this._pathBox.Text = path;
-        this.Text = $"{Path.GetFileName(path)} - {Strings.AppName}";
+        this.Text = $"{ItemPath.DisplayName(path)} - {Strings.AppName}";
         this.Render();
     }
 
@@ -506,7 +493,7 @@ internal sealed partial class MainForm : Form
         {
             AddExtension = true,
             Filter = Strings.SaveDialogFilter,
-            FileName = Path.GetFileNameWithoutExtension(this._path) + "_thumbico",
+            FileName = ItemPath.DefaultSaveName(this._path),
         };
 
         if (dialog.ShowDialog(this) != DialogResult.OK)
@@ -516,33 +503,13 @@ internal sealed partial class MainForm : Form
 
         try
         {
-            this._thumbico.Save(dialog.FileName, ChooseFormat(dialog.FileName, dialog.FilterIndex));
+            this._thumbico.Save(dialog.FileName, ItemPath.FormatFrom(dialog.FileName, dialog.FilterIndex));
         }
         catch (Exception error) when (error is IOException or UnauthorizedAccessException)
         {
             this._returnedLabel.Text = error.Message;
         }
     }
-
-    /// <summary>
-    /// Decides what to write, preferring the name the user typed over the filter they left selected.
-    /// </summary>
-    /// <remarks>
-    /// The dialog appends the filter's extension when none was typed, so in the ordinary case these
-    /// two agree and the filter decides. They disagree only when the name carries an extension of
-    /// its own, and then the name has to win: every other program reads the file by its extension,
-    /// so honouring the filter instead would write BMP bytes into something called .png.
-    /// </remarks>
-    private static ThumbicoFormat ChooseFormat(string fileName, int filterIndex)
-        => Path.GetExtension(fileName).ToUpperInvariant() switch
-        {
-            ".PNG" => ThumbicoFormat.Png,
-            ".BMP" => ThumbicoFormat.Bmp,
-            ".GIF" => ThumbicoFormat.Gif,
-            ".JPG" or ".JPEG" => ThumbicoFormat.Jpeg,
-            ".TIF" or ".TIFF" => ThumbicoFormat.Tiff,
-            _ => SaveFormats[filterIndex - 1],
-        };
 
     /// <summary>
     /// Puts the image on the clipboard twice: as PNG bytes, which keep the alpha channel, and as a
